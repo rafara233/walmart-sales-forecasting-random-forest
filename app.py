@@ -349,7 +349,7 @@ dataset periode 2011–2013.
         duplicate
     )
     if duplicate == 0:
-    st.success(
+        st.success(
             "Tidak ditemukan data duplikat."
         )
     else:
