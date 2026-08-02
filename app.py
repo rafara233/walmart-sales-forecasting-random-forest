@@ -1339,7 +1339,7 @@ dilatih menggunakan data Walmart periode **2011–2013**.
         # ==============================================
         # KATEGORI
         # ==============================================
-       q1 = df["Weekly_Sales"].quantile(0.25)
+q1 = df["Weekly_Sales"].quantile(0.25)
 q3 = df["Weekly_Sales"].quantile(0.75)
 if hasil < q1:
     kategori = "🔴 Rendah"
