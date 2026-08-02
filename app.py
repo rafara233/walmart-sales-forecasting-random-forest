@@ -78,18 +78,30 @@ st.markdown("""
 <style>
 
 div.stButton > button {
-    color: black;
-    font-size: 18px;
-    font-weight: bold;
+    color: black !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    background-color: white !important;
+    border: none !important;
+    height: 50px;
     border-radius: 8px;
 }
 
+/* Saat mouse diarahkan */
 div.stButton > button:hover {
-    color: black;
+    color: black !important;
+    background-color: #eeeeee !important;
+}
+
+/* Semua teks pada menu */
+div.stButton > button p {
+    color: black !important;
+    font-weight: 700 !important;
 }
 
 </style>
 """, unsafe_allow_html=True)
+
 st.title("📈 Dashboard Prediksi Penjualan Walmart")
 
 st.caption(
