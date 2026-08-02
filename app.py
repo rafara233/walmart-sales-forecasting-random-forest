@@ -429,8 +429,7 @@ if menu == "Dataset":
     )
 
     st.dataframe(
-        show_table(df.head(jumlah)),
-        use_container_width=True
+        show_table(df.head),
     )
 
     st.divider()
@@ -456,7 +455,6 @@ if menu == "Dataset":
 
     st.dataframe(
         show_table(info),
-        use_container_width=True
     )
 
     st.divider()
@@ -501,7 +499,6 @@ if menu == "Dataset":
 
     st.dataframe(
         show_table(deskripsi),
-        use_container_width=True
     )
 
     st.divider()
