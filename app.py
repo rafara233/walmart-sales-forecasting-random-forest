@@ -1349,6 +1349,7 @@ elif hasil < q3:
     kategori = "🟡 Sedang"
 else:
     kategori = "🟢 Tinggi"
+    
         st.success(
             f"Estimasi Weekly Sales : **USD ${hasil:,.2f}**"
         )
