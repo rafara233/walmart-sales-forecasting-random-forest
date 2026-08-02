@@ -119,6 +119,12 @@ df["Rolling_STD_4"] = (
 
 # Hapus baris yang memiliki NaN akibat lag
 df = df.dropna()
+
+df.drop("Date", axis=1, inplace=True)
+
+y = df["Weekly_Sales"]
+X = df.drop("Weekly_Sales", axis=1)
+
 # Visualisasi
 with tab3:
 
