@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import (
@@ -8,6 +9,7 @@ from sklearn.metrics import (
     mean_squared_error,
     r2_score
 )
+
 import matplotlib.pyplot as plt
 
 # ==========================================================
@@ -19,21 +21,31 @@ st.set_page_config(
     page_icon="📈",
     layout="wide"
 )
+
 st.title("📈 Dashboard Prediksi Penjualan Walmart")
-st.caption("Analisis Dataset Walmart dan Prediksi Weekly Salesmenggunakan Random Forest Regression.")
+
+st.caption(
+    "Analisis Dataset Walmart dan Prediksi Weekly Sales "
+    "menggunakan Random Forest Regression."
+)
 
 # ==========================================================
 # LOAD DATASET
 # ==========================================================
 
 DATA_URL = (
-    "https://raw.githubusercontent.com/rafara233/walmart-sales-forecasting-random-forest/refs/heads/main/Walmart_Sales.csv"
+    "https://raw.githubusercontent.com/"
+    "rafara233/"
+    "walmart-sales-forecasting-random-forest/"
+    "refs/heads/main/"
+    "Walmart_Sales.csv"
 )
 
 @st.cache_data
 def load_data():
     df = pd.read_csv(DATA_URL)
     return df
+
 df = load_data()
 
 # ==========================================================
@@ -44,6 +56,7 @@ df["Date"] = pd.to_datetime(
     df["Date"],
     format="%d-%m-%Y"
 )
+
 df["Year"] = df["Date"].dt.year
 df["Month"] = df["Date"].dt.month
 df["Week"] = (
@@ -57,13 +70,16 @@ df["Week"] = (
 # ==========================================================
 # DATA MODEL
 # ==========================================================
+
 df_model = df.drop(columns=["Date"])
+
 X = df_model.drop(columns=["Weekly_Sales"])
 y = df_model["Weekly_Sales"]
 
 # ==========================================================
 # PERBANDINGAN SPLIT DATA
 # ==========================================================
+
 split_ratio = {
     "90 : 10": 0.10,
     "80 : 20": 0.20,
@@ -72,26 +88,35 @@ split_ratio = {
 }
 
 hasil_split = []
+
 for nama, test_size in split_ratio.items():
+
     X_train, X_test, y_train, y_test = train_test_split(
         X,
         y,
         test_size=test_size,
         random_state=42
     )
+
     rf = RandomForestRegressor(
         n_estimators=100,
         random_state=42
     )
+
     rf.fit(X_train, y_train)
+
     pred = rf.predict(X_test)
+
     hasil_split.append({
+
         "Split": nama,
+
         "MAE":
         mean_absolute_error(
             y_test,
             pred
         ),
+
         "RMSE":
         np.sqrt(
             mean_squared_error(
@@ -99,13 +124,17 @@ for nama, test_size in split_ratio.items():
                 pred
             )
         ),
+
         "R²":
         r2_score(
             y_test,
             pred
         )
+
     })
+
 hasil_split = pd.DataFrame(hasil_split)
+
 best_split = hasil_split.loc[
     hasil_split["R²"].idxmax()
 ]
@@ -113,6 +142,7 @@ best_split = hasil_split.loc[
 # ==========================================================
 # MODEL TERBAIK
 # ==========================================================
+
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
@@ -126,7 +156,9 @@ model = RandomForestRegressor(
 )
 
 model.fit(X_train, y_train)
+
 pred = model.predict(X_test)
+
 mae = mean_absolute_error(
     y_test,
     pred
@@ -147,8 +179,11 @@ r2 = r2_score(
 # ==========================================================
 # FEATURE IMPORTANCE
 # ==========================================================
+
 feature_importance = pd.DataFrame({
+
     "Feature": X.columns,
+
     "Importance":
     model.feature_importances_
 
@@ -160,6 +195,7 @@ feature_importance = pd.DataFrame({
 # ==========================================================
 # KORELASI
 # ==========================================================
+
 corr = df_model.corr(
     numeric_only=True
 )
@@ -167,6 +203,7 @@ corr = df_model.corr(
 # ==========================================================
 # SIDEBAR
 # ==========================================================
+
 menu = st.sidebar.radio(
     "📋 Menu",
     [
@@ -177,12 +214,14 @@ menu = st.sidebar.radio(
         "📄 Kesimpulan"
     ]
 )
-
 # ==========================================================
 # MENU DATASET
 # ==========================================================
+
 if menu == "📂 Dataset":
+
     st.header("📂 Dataset Walmart")
+
     st.markdown("""
     Menu ini menampilkan informasi umum mengenai dataset yang digunakan
     sebagai dasar pembangunan model Machine Learning.
@@ -191,53 +230,68 @@ if menu == "📂 Dataset":
     # ======================================================
     # METRIC
     # ======================================================
+
     col1, col2, col3, col4 = st.columns(4)
+
     col1.metric(
         "Jumlah Baris",
         f"{df.shape[0]:,}"
     )
+
     col2.metric(
         "Jumlah Kolom",
         df.shape[1]
     )
+
     col3.metric(
         "Missing Value",
         int(df.isnull().sum().sum())
     )
+
     col4.metric(
         "Data Duplikat",
         int(df.duplicated().sum())
     )
-    
+
     st.divider()
 
     # ======================================================
     # PREVIEW DATASET
     # ======================================================
+
     st.subheader("Preview Dataset")
+
     jumlah = st.slider(
         "Jumlah data yang ditampilkan",
         min_value=5,
         max_value=30,
         value=10
     )
+
     st.dataframe(
         df.head(jumlah),
         use_container_width=True
     )
-    
+
     st.divider()
 
     # ======================================================
     # INFORMASI DATASET
     # ======================================================
+
     st.subheader("Informasi Dataset")
+
     info = pd.DataFrame({
+
         "Nama Kolom": df.columns,
+
         "Tipe Data": df.dtypes.astype(str),
+
         "Missing Value": df.isnull().sum().values,
+
         "Jumlah Nilai Unik":
         [df[col].nunique() for col in df.columns]
+
     })
 
     st.dataframe(
@@ -250,8 +304,11 @@ if menu == "📂 Dataset":
     # ======================================================
     # DESKRIPSI KOLOM
     # ======================================================
+
     st.subheader("Deskripsi Setiap Kolom")
+
     deskripsi = pd.DataFrame({
+
         "Kolom":[
             "Store",
             "Date",
@@ -279,8 +336,9 @@ if menu == "📂 Dataset":
             "Bulan transaksi.",
             "Minggu transaksi."
         ]
+
     })
-    
+
     st.dataframe(
         deskripsi,
         use_container_width=True
@@ -291,94 +349,136 @@ if menu == "📂 Dataset":
     # ======================================================
     # RENTANG DATASET
     # ======================================================
+
     st.subheader("Rentang Dataset")
+
     col1, col2, col3 = st.columns(3)
+
     col1.metric(
         "Tahun Awal",
         int(df["Year"].min())
     )
+
     col2.metric(
         "Tahun Akhir",
         int(df["Year"].max())
     )
+
     col3.metric(
         "Jumlah Store",
         df["Store"].nunique()
     )
 
-    st.info(""" Dataset Walmart yang digunakan pada penelitian ini mencakup data penjualan dari **tahun 2011 hingga 2013**.
-Walaupun pada menu prediksi pengguna dapat memasukkan tahun di atas 2013, model tetap mempelajari pola berdasarkan 
+    st.info("""
+Dataset Walmart yang digunakan pada penelitian ini
+mencakup data penjualan dari **tahun 2011 hingga 2013**.
+Walaupun pada menu prediksi pengguna dapat memasukkan tahun
+di atas 2013, model tetap mempelajari pola berdasarkan
 dataset periode 2011–2013.
 """)
-    
+
     st.divider()
 
     # ======================================================
     # NILAI HILANG
     # ======================================================
+
     st.subheader("Pemeriksaan Missing Value")
+
     missing = pd.DataFrame({
+
         "Kolom":df.columns,
+
         "Missing Value":
         df.isnull().sum().values
+
     })
+
     st.dataframe(
         missing,
         use_container_width=True
     )
+
     if df.isnull().sum().sum() == 0:
-        
+
         st.success(
             "Tidak ditemukan missing value pada dataset."
         )
+
     else:
-        
+
         st.warning(
             "Masih terdapat missing value."
         )
-        
+
     st.divider()
 
     # ======================================================
     # DUPLIKAT
     # ======================================================
+
     st.subheader("Pemeriksaan Data Duplikat")
+
     duplicate = df.duplicated().sum()
+
     st.metric(
         "Jumlah Data Duplikat",
         duplicate
     )
+
     if duplicate == 0:
+
         st.success(
             "Tidak ditemukan data duplikat."
         )
+
     else:
+
         st.warning(
             "Terdapat data duplikat yang sebaiknya dibersihkan."
         )
-        
+
     st.divider()
 
     # ======================================================
     # INSIGHT
     # ======================================================
+
     st.subheader("Insight Dataset")
+
     st.success(f"""
-1. Dataset terdiri dari **{df.shape[0]:,} baris** dan **{df.shape[1]} kolom**.
-2. Dataset mencakup data penjualan Walmart selama periode **2011–2013**.
-3. Dataset digunakan sebagai dasar pembangunan model Random Forest Regression.
-4. Tidak ditemukan missing value sehingga data siap digunakan untuk proses Machine Learning.
-5. Pemeriksaan data duplikat membantu memastikan kualitas data sebelum proses pelatihan model.
-6. Variabel target yang diprediksi adalah **Weekly Sales (USD)**.
-7. Variabel Store, Holiday Flag, Temperature, Fuel Price, CPI, Unemployment, Year,
-   Month, dan Week digunakan sebagai fituruntuk memprediksi Weekly Sales.
+1. Dataset terdiri dari **{df.shape[0]:,} baris**
+   dan **{df.shape[1]} kolom**.
+
+2. Dataset mencakup data penjualan Walmart
+   selama periode **2011–2013**.
+
+3. Dataset digunakan sebagai dasar
+   pembangunan model Random Forest Regression.
+
+4. Tidak ditemukan missing value sehingga
+   data siap digunakan untuk proses Machine Learning.
+
+5. Pemeriksaan data duplikat membantu memastikan
+   kualitas data sebelum proses pelatihan model.
+
+6. Variabel target yang diprediksi adalah
+   **Weekly Sales (USD)**.
+
+7. Variabel Store, Holiday Flag, Temperature,
+   Fuel Price, CPI, Unemployment, Year,
+   Month, dan Week digunakan sebagai fitur
+   untuk memprediksi Weekly Sales.
 """)
 
 # ==========================================================
 # MENU STATISTIK
 # ==========================================================
+
 elif menu == "📊 Statistik":
+
     st.header("📊 Statistik Dataset")
+
     st.markdown("""
     Menu ini menyajikan analisis statistik deskriptif untuk memahami karakteristik data
     sebelum dilakukan proses Machine Learning.
@@ -387,8 +487,11 @@ elif menu == "📊 Statistik":
     # ======================================================
     # STATISTIK DESKRIPTIF
     # ======================================================
+
     st.subheader("Statistik Deskriptif")
+
     statistik = df.describe().T
+
     statistik = statistik.rename(columns={
         "count": "Jumlah Data",
         "mean": "Rata-rata",
@@ -407,171 +510,233 @@ elif menu == "📊 Statistik":
 
     st.info("""
 **Insight Statistik Deskriptif**
+
 - Nilai rata-rata menunjukkan kecenderungan pusat dari setiap variabel.
 - Standar deviasi menunjukkan tingkat penyebaran data.
 - Semakin besar standar deviasi, semakin besar variasi data.
 - Nilai minimum dan maksimum menunjukkan rentang data yang dimiliki masing-masing variabel.
 """)
-    
+
     st.divider()
 
     # ======================================================
     # HISTOGRAM WEEKLY SALES
     # ======================================================
+
     st.subheader("Distribusi Weekly Sales")
+
     fig, ax = plt.subplots(figsize=(10,5))
+
     ax.hist(
         df["Weekly_Sales"],
         bins=30,
         edgecolor="black"
     )
+
     ax.set_title("Histogram Weekly Sales")
+
     ax.set_xlabel("Weekly Sales (USD)")
+
     ax.set_ylabel("Frekuensi")
+
     st.pyplot(fig)
+
     st.info("""
 **Insight Histogram**
+
 - Histogram menunjukkan persebaran nilai Weekly Sales.
 - Distribusi yang tidak merata menandakan adanya variasi penjualan antar toko.
 - Nilai penjualan yang tinggi maupun rendah tetap dipelajari oleh model Random Forest.
 """)
-    
+
     st.divider()
 
     # ======================================================
     # BOXPLOT
     # ======================================================
+
     st.subheader("Boxplot Weekly Sales")
+
     fig2, ax2 = plt.subplots(figsize=(10,3))
+
     ax2.boxplot(df["Weekly_Sales"], vert=False)
+
     ax2.set_xlabel("Weekly Sales (USD)")
+
     st.pyplot(fig2)
+
     st.info("""
 **Insight Boxplot**
+
 - Boxplot digunakan untuk mendeteksi adanya outlier.
 - Titik yang berada di luar whisker menunjukkan nilai yang jauh berbeda dibandingkan sebagian besar data.
 - Random Forest relatif tahan terhadap keberadaan outlier sehingga model masih dapat bekerja dengan baik.
 """)
-    
+
     st.divider()
 
     # ======================================================
     # RATA-RATA PENJUALAN PER STORE
     # ======================================================
+
     st.subheader("Rata-rata Weekly Sales per Store")
+
     avg_store = (
         df.groupby("Store")["Weekly_Sales"]
         .mean()
         .sort_index()
     )
+
     fig3, ax3 = plt.subplots(figsize=(12,5))
+
     ax3.bar(
         avg_store.index.astype(str),
         avg_store.values
     )
+
     ax3.set_title("Rata-rata Weekly Sales per Store")
     ax3.set_xlabel("Store")
     ax3.set_ylabel("Weekly Sales (USD)")
+
     plt.xticks(rotation=90)
+
     st.pyplot(fig3)
+
     st.info(f"""
 **Insight**
+
 - Store dengan rata-rata penjualan tertinggi adalah **Store {avg_store.idxmax()}**
   dengan rata-rata sekitar **USD ${avg_store.max():,.2f}**.
+
 - Store dengan rata-rata penjualan terendah adalah **Store {avg_store.idxmin()}**
   dengan rata-rata sekitar **USD ${avg_store.min():,.2f}**.
+
 - Perbedaan rata-rata penjualan antar store menunjukkan bahwa setiap toko memiliki karakteristik penjualan yang berbeda.
 """)
-    
+
     st.divider()
 
     # ======================================================
     # RATA-RATA PENJUALAN PER BULAN
     # ======================================================
+
     st.subheader("Rata-rata Weekly Sales per Bulan")
+
     avg_month = (
         df.groupby("Month")["Weekly_Sales"]
         .mean()
         .sort_index()
     )
+
     fig4, ax4 = plt.subplots(figsize=(10,4))
+
     ax4.plot(
         avg_month.index,
         avg_month.values,
         marker="o"
     )
+
     ax4.set_xticks(range(1,13))
+
     ax4.set_xlabel("Month")
     ax4.set_ylabel("Weekly Sales (USD)")
     ax4.set_title("Rata-rata Weekly Sales per Bulan")
+
     st.pyplot(fig4)
+
     st.info("""
 **Insight**
+
 - Grafik ini menunjukkan perubahan rata-rata penjualan pada setiap bulan.
 - Bulan dengan rata-rata penjualan tinggi menunjukkan periode dengan aktivitas penjualan yang lebih besar.
 - Informasi ini membantu memahami pola musiman (seasonality) pada data.
 """)
-    
+
     st.divider()
 
     # ======================================================
     # RINGKASAN STATISTIK
     # ======================================================
+
     st.subheader("Ringkasan Statistik Weekly Sales")
+
     col1, col2, col3 = st.columns(3)
+
     col1.metric(
         "Rata-rata",
         f"USD ${df['Weekly_Sales'].mean():,.2f}"
     )
+
     col2.metric(
         "Median",
         f"USD ${df['Weekly_Sales'].median():,.2f}"
     )
+
     col3.metric(
         "Standar Deviasi",
         f"USD ${df['Weekly_Sales'].std():,.2f}"
     )
+
     col4, col5 = st.columns(2)
+
     col4.metric(
         "Minimum",
         f"USD ${df['Weekly_Sales'].min():,.2f}"
     )
+
     col5.metric(
         "Maksimum",
         f"USD ${df['Weekly_Sales'].max():,.2f}"
     )
-    
+
     st.divider()
 
     # ======================================================
     # KESIMPULAN STATISTIK
     # ======================================================
+
     st.subheader("Kesimpulan Analisis Statistik")
+
     st.success(f"""
 1. Dataset memiliki **{len(df):,}** data yang siap digunakan untuk proses Machine Learning.
+
 2. Nilai rata-rata Weekly Sales adalah sekitar **USD ${df['Weekly_Sales'].mean():,.2f}**.
+
 3. Nilai maksimum Weekly Sales mencapai **USD ${df['Weekly_Sales'].max():,.2f}**, sedangkan nilai minimum sebesar **USD ${df['Weekly_Sales'].min():,.2f}**.
+
 4. Terdapat perbedaan rata-rata penjualan antar store, yang menunjukkan bahwa karakteristik setiap toko tidak sama.
+
 5. Pola penjualan bulanan menunjukkan adanya perubahan rata-rata penjualan pada periode tertentu sehingga faktor waktu menjadi salah satu variabel penting.
+
 6. Berdasarkan hasil analisis statistik, variabel-variabel pada dataset layak digunakan untuk membangun model prediksi menggunakan Random Forest Regression.
 """)
 
 # ==========================================================
 # MENU MACHINE LEARNING
 # ==========================================================
+
 elif menu == "🤖 Machine Learning":
+
     st.header("🤖 Machine Learning - Random Forest Regression")
+
     st.markdown("""
-Pada penelitian ini digunakan algoritma **Random Forest Regression** untuk memprediksi nilai **Weekly Sales (USD)**.
-Random Forest merupakan algoritma Machine Learning bertipe **Supervised Learning** yang bekerja dengan membangun banyak Decision Tree, kemudian
-menggabungkan hasil prediksi seluruh tree sehingga menghasilkan prediksi yang lebih stabil dan akurat.
+Pada penelitian ini digunakan algoritma **Random Forest Regression**
+untuk memprediksi nilai **Weekly Sales (USD)**.
+
+Random Forest merupakan algoritma Machine Learning bertipe **Supervised Learning**
+yang bekerja dengan membangun banyak Decision Tree, kemudian
+menggabungkan hasil prediksi seluruh tree sehingga menghasilkan prediksi
+yang lebih stabil dan akurat.
 """)
 
     # ======================================================
     # MENGAPA RANDOM FOREST
     # ======================================================
+
     st.subheader("Mengapa Menggunakan Random Forest Regression?")
+
     alasan = pd.DataFrame({
+
         "Alasan":[
             "Mampu menangani hubungan non-linear",
             "Tidak mudah mengalami overfitting",
@@ -599,30 +764,40 @@ menggabungkan hasil prediksi seluruh tree sehingga menghasilkan prediksi yang le
 
     st.success("""
 ### Kesimpulan
+
 Random Forest Regression dipilih karena mampu menghasilkan prediksi
 yang akurat, stabil, serta dapat menunjukkan variabel mana yang
 paling memengaruhi nilai Weekly Sales.
 """)
-    
+
     st.divider()
 
     # ======================================================
     # FITUR DAN TARGET
     # ======================================================
+
     st.subheader("Fitur dan Target")
+
     col1, col2 = st.columns(2)
+
     with col1:
+
         st.write("### Variabel Input (Feature)")
+
         fitur = pd.DataFrame({
             "Feature": X.columns
         })
+
         st.dataframe(
             fitur,
             use_container_width=True,
             hide_index=True
         )
+
     with col2:
+
         st.write("### Variabel Target")
+
         target = pd.DataFrame({
             "Target":[
                 "Weekly_Sales"
@@ -631,6 +806,7 @@ paling memengaruhi nilai Weekly Sales.
                 "Total penjualan mingguan (USD)"
             ]
         })
+
         st.dataframe(
             target,
             use_container_width=True,
@@ -642,13 +818,15 @@ Model akan mempelajari hubungan antara seluruh variabel input
 (Store, Holiday Flag, Temperature, Fuel Price, CPI, Unemployment,
 Year, Month, dan Week) terhadap nilai Weekly Sales.
 """)
-    
+
     st.divider()
 
     # ======================================================
     # PERBANDINGAN SPLIT DATA
     # ======================================================
+
     st.subheader("Perbandingan Split Data")
+
     st.dataframe(
         hasil_split.style.format({
             "MAE":"{:.2f}",
@@ -657,6 +835,7 @@ Year, Month, dan Week) terhadap nilai Weekly Sales.
         }),
         use_container_width=True
     )
+
     st.success(
         f"Split terbaik berdasarkan nilai R² adalah **{best_split['Split']}**."
     )
@@ -666,31 +845,40 @@ Year, Month, dan Week) terhadap nilai Weekly Sales.
     # ======================================================
     # PENJELASAN METRIK
     # ======================================================
+
     st.subheader("Penjelasan Metrik Evaluasi")
+
     metrik = pd.DataFrame({
+
         "Metrik":[
             "MAE",
             "RMSE",
             "R² Score"
         ],
+
         "Fungsi":[
             "Mengukur rata-rata kesalahan prediksi.",
             "Mengukur besar kesalahan dengan memberi penalti lebih besar pada error yang tinggi.",
             "Mengukur kemampuan model menjelaskan variasi data."
         ],
+
         "Interpretasi":[
             "Semakin kecil semakin baik.",
             "Semakin kecil semakin baik.",
             "Semakin mendekati 1 semakin baik."
         ]
+
     })
+
     st.dataframe(
         metrik,
         use_container_width=True,
         hide_index=True
     )
+
     st.info("""
 ### Insight
+
 - Nilai MAE dan RMSE digunakan untuk mengetahui besar kesalahan prediksi.
 - Nilai R² menunjukkan seberapa baik model mampu menjelaskan variasi Weekly Sales.
 - Split data dengan nilai R² tertinggi dipilih sebagai acuan karena memberikan performa terbaik pada data uji.
@@ -701,10 +889,14 @@ Year, Month, dan Week) terhadap nilai Weekly Sales.
     # ======================================================
     # KORELASI ANTAR KOLOM
     # ======================================================
+
     st.subheader("Korelasi Antar Variabel")
+
     st.markdown("""
 Korelasi digunakan untuk mengetahui hubungan antar variabel numerik.
+
 Nilai korelasi berada pada rentang **-1 sampai 1**.
+
 - Nilai mendekati **1**  → hubungan positif sangat kuat.
 - Nilai mendekati **-1** → hubungan negatif sangat kuat.
 - Nilai mendekati **0**  → hampir tidak memiliki hubungan.
@@ -713,19 +905,25 @@ Nilai korelasi berada pada rentang **-1 sampai 1**.
     # ==========================================
     # HEATMAP
     # ==========================================
+
     fig, ax = plt.subplots(figsize=(10,8))
+
     im = ax.imshow(
         corr,
         cmap="coolwarm"
     )
+
     ax.set_xticks(range(len(corr.columns)))
     ax.set_xticklabels(
         corr.columns,
         rotation=90
     )
+
     ax.set_yticks(range(len(corr.columns)))
     ax.set_yticklabels(corr.columns)
+
     plt.colorbar(im)
+
     st.pyplot(fig)
 
     st.divider()
@@ -733,7 +931,9 @@ Nilai korelasi berada pada rentang **-1 sampai 1**.
     # ==========================================
     # TABEL KORELASI
     # ==========================================
+
     st.subheader("Tabel Korelasi")
+
     st.dataframe(
         corr.round(3),
         use_container_width=True
@@ -744,7 +944,9 @@ Nilai korelasi berada pada rentang **-1 sampai 1**.
     # ==========================================
     # KORELASI TERHADAP TARGET
     # ==========================================
+
     st.subheader("Korelasi Terhadap Weekly Sales")
+
     corr_target = (
         corr["Weekly_Sales"]
         .drop("Weekly_Sales")
@@ -752,10 +954,14 @@ Nilai korelasi berada pada rentang **-1 sampai 1**.
             ascending=False
         )
     )
+
     corr_df = pd.DataFrame({
+
         "Feature": corr_target.index,
-         "Correlation":
+
+        "Correlation":
         corr_target.values
+
     })
 
     st.dataframe(
@@ -769,8 +975,11 @@ Nilai korelasi berada pada rentang **-1 sampai 1**.
     # ==========================================
     # INTERPRETASI
     # ==========================================
+
     st.subheader("Interpretasi Tingkat Korelasi")
+
     interpretasi = pd.DataFrame({
+
         "Nilai Korelasi":[
             "0.80 – 1.00",
             "0.60 – 0.79",
@@ -800,9 +1009,12 @@ Nilai korelasi berada pada rentang **-1 sampai 1**.
     # ==========================================
     # VARIABEL PALING BERPENGARUH
     # ==========================================
+
     st.subheader("Analisis Hubungan Variabel")
+
     terbesar = corr_target.abs().idxmax()
     nilai = corr_target[terbesar]
+
     st.success(f"""
 Variabel yang memiliki hubungan paling kuat terhadap **Weekly Sales**
 berdasarkan analisis korelasi adalah **{terbesar}**
@@ -811,11 +1023,17 @@ dengan nilai korelasi **{nilai:.3f}**.
 
     st.info(f"""
 ### Insight
+
 1. Variabel **{terbesar}** merupakan variabel yang memiliki hubungan paling besar terhadap Weekly Sales berdasarkan korelasi.
+
 2. Semakin besar nilai absolut korelasi, semakin besar hubungan antara variabel tersebut dengan Weekly Sales.
+
 3. Variabel dengan korelasi kecil bukan berarti tidak digunakan oleh model.
+
 4. Random Forest mampu mempelajari hubungan yang bersifat **non-linear**, sehingga variabel yang memiliki korelasi rendah masih dapat memberikan kontribusi terhadap hasil prediksi.
+
 5. Oleh karena itu, seluruh variabel seperti:
+
 - Store
 - Holiday Flag
 - Temperature
@@ -825,12 +1043,15 @@ dengan nilai korelasi **{nilai:.3f}**.
 - Year
 - Month
 - Week
+
 tetap digunakan pada proses pelatihan model Random Forest Regression.
 """)
 
     st.warning("""
 Catatan:
+
 Korelasi hanya menunjukkan hubungan linier antar variabel.
+
 Sedangkan Random Forest Regression mampu mempelajari hubungan yang
 lebih kompleks (non-linear), sehingga hasil Feature Importance dapat
 berbeda dengan nilai korelasi.
@@ -841,30 +1062,41 @@ berbeda dengan nilai korelasi.
     # ======================================================
     # EVALUASI MODEL
     # ======================================================
+
     st.header("Evaluasi Model Random Forest")
+
     st.markdown("""
 Evaluasi model dilakukan untuk mengetahui seberapa baik model
 Random Forest Regression dalam memprediksi nilai **Weekly Sales**.
+
 Semakin kecil nilai **MAE** dan **RMSE**, serta semakin mendekati **1**
 nilai **R²**, maka semakin baik performa model.
 """)
+
     col1, col2, col3 = st.columns(3)
+
     col1.metric(
         "MAE",
         f"USD ${mae:,.2f}"
     )
+
     col2.metric(
         "RMSE",
         f"USD ${rmse:,.2f}"
     )
+
     col3.metric(
         "R² Score",
         f"{r2:.4f}"
     )
+
     st.info(f"""
 ### Hasil Evaluasi
+
 ✅ MAE  : **USD ${mae:,.2f}**
+
 ✅ RMSE : **USD ${rmse:,.2f}**
+
 ✅ R²   : **{r2:.4f}**
 """)
 
@@ -873,15 +1105,19 @@ nilai **R²**, maka semakin baik performa model.
     # ======================================================
     # DATA AKTUAL VS PREDIKSI
     # ======================================================
+
     st.subheader("Perbandingan Nilai Aktual dan Prediksi")
+
     hasil_prediksi = pd.DataFrame({
         "Actual Weekly Sales": y_test.values,
         "Prediction Weekly Sales": pred
     })
+
     st.dataframe(
         hasil_prediksi.head(20),
         use_container_width=True
     )
+
     st.caption(
         "Menampilkan 20 data pertama hasil prediksi model."
     )
@@ -891,32 +1127,42 @@ nilai **R²**, maka semakin baik performa model.
     # ======================================================
     # SCATTER PLOT
     # ======================================================
+
     st.subheader("Scatter Plot: Actual vs Prediction")
+
     fig5, ax5 = plt.subplots(figsize=(7,7))
+
     ax5.scatter(
         y_test,
         pred,
         alpha=0.6
     )
+
     min_val = min(
         y_test.min(),
         pred.min()
     )
+
     max_val = max(
         y_test.max(),
         pred.max()
     )
+
     ax5.plot(
         [min_val, max_val],
         [min_val, max_val],
         linestyle="--"
     )
+
     ax5.set_xlabel("Actual Weekly Sales (USD)")
     ax5.set_ylabel("Prediction Weekly Sales (USD)")
     ax5.set_title("Actual vs Prediction")
+
     st.pyplot(fig5)
+
     st.info("""
 ### Insight Scatter Plot
+
 - Setiap titik menunjukkan satu data uji.
 - Semakin dekat titik terhadap garis diagonal,
   maka hasil prediksi semakin mendekati nilai aktual.
@@ -929,17 +1175,22 @@ nilai **R²**, maka semakin baik performa model.
     # ======================================================
     # RESIDUAL ERROR
     # ======================================================
+
     residual = y_test - pred
+
     st.subheader("Residual Error")
+
     residual_df = pd.DataFrame({
         "Actual": y_test.values,
         "Prediction": pred,
         "Residual Error": residual
     })
+
     st.dataframe(
         residual_df.head(20),
         use_container_width=True
     )
+
     st.caption(
         "Residual Error = Actual - Prediction"
     )
@@ -949,19 +1200,26 @@ nilai **R²**, maka semakin baik performa model.
     # ======================================================
     # HISTOGRAM RESIDUAL
     # ======================================================
+
     st.subheader("Distribusi Residual Error")
+
     fig6, ax6 = plt.subplots(figsize=(8,4))
+
     ax6.hist(
         residual,
         bins=25,
         edgecolor="black"
     )
+
     ax6.set_xlabel("Residual Error")
     ax6.set_ylabel("Frekuensi")
     ax6.set_title("Histogram Residual Error")
+
     st.pyplot(fig6)
+
     st.info("""
 ### Insight Residual Error
+
 - Residual Error merupakan selisih antara nilai aktual dan hasil prediksi.
 - Nilai residual yang mendekati nol menunjukkan prediksi yang baik.
 - Distribusi residual yang menyebar di sekitar nol mengindikasikan model tidak memiliki bias yang besar.
@@ -972,13 +1230,20 @@ nilai **R²**, maka semakin baik performa model.
     # ======================================================
     # KESIMPULAN EVALUASI
     # ======================================================
+
     st.subheader("Kesimpulan Evaluasi Model")
+
     st.success(f"""
 1. Model menggunakan algoritma **Random Forest Regression**.
+
 2. Nilai **MAE** sebesar **USD ${mae:,.2f}** menunjukkan rata-rata kesalahan prediksi model.
+
 3. Nilai **RMSE** sebesar **USD ${rmse:,.2f}** menunjukkan besarnya kesalahan prediksi dengan memberikan penalti lebih besar terhadap error yang tinggi.
+
 4. Nilai **R²** sebesar **{r2:.4f}** menunjukkan kemampuan model dalam menjelaskan variasi data Weekly Sales.
+
 5. Scatter Plot memperlihatkan bahwa sebagian besar hasil prediksi berada cukup dekat dengan nilai aktual.
+
 6. Distribusi Residual Error menunjukkan bahwa kesalahan prediksi tidak terpusat pada nilai tertentu, sehingga model memiliki performa yang cukup baik untuk digunakan dalam melakukan prediksi Weekly Sales.
 """)
 
@@ -1131,18 +1396,25 @@ lebih kecil dibandingkan variabel lainnya.
     # ======================================================
     # KESIMPULAN FEATURE IMPORTANCE
     # ======================================================
+
     st.subheader("Kesimpulan Feature Importance")
+
     st.success(f"""
 1. Random Forest menghitung tingkat kepentingan setiap variabel secara otomatis.
+
 2. Variabel yang paling berpengaruh adalah **{fitur_tertinggi['Feature']}**
    dengan nilai importance sebesar **{fitur_tertinggi['Importance']:.4f}**.
+
 3. Variabel dengan nilai importance kecil tidak berarti tidak berguna,
    tetapi kontribusinya lebih rendah dibandingkan fitur lainnya.
+
 4. Seluruh variabel tetap digunakan oleh model karena Random Forest
    memanfaatkan kombinasi seluruh fitur untuk menghasilkan prediksi yang optimal.
+
 5. Hasil Feature Importance dapat berbeda dengan hasil analisis korelasi,
    karena Random Forest mampu mempelajari hubungan yang bersifat
    **non-linear**, sedangkan korelasi hanya mengukur hubungan linier.
+
 6. Berdasarkan hasil evaluasi model, korelasi, dan Feature Importance,
    Random Forest Regression dinilai layak digunakan untuk memprediksi
    **Weekly Sales (USD)** pada dataset Walmart.
@@ -1159,6 +1431,7 @@ elif menu == "📈 Prediksi":
     st.markdown("""
 Menu ini digunakan untuk memperkirakan **Weekly Sales (USD)** berdasarkan
 nilai input yang diberikan pengguna.
+
 Model yang digunakan adalah **Random Forest Regression** yang telah
 dilatih menggunakan data Walmart periode **2011–2013**.
 """)
@@ -1320,6 +1593,7 @@ dilatih menggunakan data Walmart periode **2011–2013**.
     # ======================================================
     # PREDIKSI
     # ======================================================
+
     if st.button("Prediksi Weekly Sales"):
 
         data_baru = pd.DataFrame({
@@ -1342,21 +1616,21 @@ dilatih menggunakan data Walmart periode **2011–2013**.
         # KATEGORI
         # ==============================================
 
-        q1 = df["Weekly_Sales"].quantile(0.25)
-        q3 = df["Weekly_Sales"].quantile(0.75)
+q1 = df["Weekly_Sales"].quantile(0.25)
+q3 = df["Weekly_Sales"].quantile(0.75)
 
-        if hasil < q1:
-            kategori = "🔴 Rendah"
-        elif hasil < q3:
-            kategori = "🟡 Sedang"
-        else:
-            kategori = "🟢 Tinggi"
+if hasil < q1:
+    kategori = "🔴 Rendah"
+elif hasil < q3:
+    kategori = "🟡 Sedang"
+else:
+    kategori = "🟢 Tinggi"
 
         st.success(
             f"Estimasi Weekly Sales : **USD ${hasil:,.2f}**"
         )
 
-        col1, col2 = st.columns(2)
+        col1,col2 = st.columns(2)
 
         col1.metric(
             "Prediksi Weekly Sales",
@@ -1395,15 +1669,18 @@ data historis Walmart periode **2011–2013**.
 5. Nilai rata-rata menjadi hasil prediksi Weekly Sales.
 
 Karena menggunakan banyak pohon keputusan (Decision Tree),
-Random Forest menghasilkan prediksi yang lebih stabil
+Random Forest cenderung menghasilkan prediksi yang lebih stabil
 dibandingkan hanya menggunakan satu Decision Tree.
 """)
-        
+
 # ==========================================================
 # MENU KESIMPULAN
 # ==========================================================
+
 elif menu == "📄 Kesimpulan":
+
     st.header("📄 Kesimpulan")
+
     st.markdown("""
 Menu ini berisi ringkasan seluruh proses mulai dari analisis dataset,
 analisis statistik, pembangunan model Machine Learning hingga proses
@@ -1501,8 +1778,10 @@ Machine Learning diperlukan untuk mempelajari pola penjualan.
 
     st.success(f"""
 Model menggunakan algoritma **Random Forest Regression**.
+
 Split data terbaik adalah **{best_split['Split']}**
 berdasarkan nilai R².
+
 Model mampu memprediksi Weekly Sales dengan performa yang
 ditunjukkan oleh nilai MAE, RMSE, dan R² di atas.
 """)
@@ -1512,16 +1791,21 @@ ditunjukkan oleh nilai MAE, RMSE, dan R² di atas.
     # ======================================================
     # FEATURE TERPENTING
     # ======================================================
+
     st.subheader("4. Variabel Paling Berpengaruh")
+
     fitur = feature_importance.iloc[0]
+
     st.metric(
         "Feature Terpenting",
         fitur["Feature"]
     )
+
     st.metric(
         "Importance Score",
         f"{fitur['Importance']:.4f}"
     )
+
     st.info(f"""
 Variabel **{fitur['Feature']}**
 merupakan variabel yang paling berpengaruh terhadap
@@ -1534,29 +1818,41 @@ yang dihitung oleh Random Forest Regression.
     # ======================================================
     # KESIMPULAN AKHIR
     # ======================================================
+
     st.subheader("5. Kesimpulan Akhir")
+
     st.success(f"""
 1. Dataset Walmart periode **2011–2013** berhasil digunakan
    sebagai dasar pembangunan model prediksi Weekly Sales.
+
 2. Hasil analisis statistik menunjukkan adanya variasi
    penjualan antar Store sehingga pendekatan Machine Learning
    layak digunakan.
+
 3. Algoritma **Random Forest Regression** dipilih karena
    mampu menangani hubungan non-linear, stabil terhadap
    data, serta dapat menghitung Feature Importance.
+
 4. Berdasarkan hasil evaluasi, model memperoleh:
+
    • MAE  : USD ${mae:,.2f}
+
    • RMSE : USD ${rmse:,.2f}
+
    • R²   : {r2:.4f}
+
 5. Variabel yang paling berpengaruh terhadap prediksi adalah
    **{fitur['Feature']}**.
+
 6. Dashboard ini memungkinkan pengguna melakukan simulasi
    prediksi Weekly Sales dengan memasukkan kondisi yang
    diinginkan.
+
 7. Walaupun pengguna dapat memasukkan tahun di atas 2013,
    model tetap melakukan prediksi berdasarkan pola data
    historis periode **2011–2013**, sehingga hasil prediksi
    merupakan estimasi dan bukan nilai aktual.
+
 8. Dashboard ini diharapkan dapat membantu dalam proses
    analisis data serta mendukung pengambilan keputusan
    berdasarkan hasil prediksi penjualan.
