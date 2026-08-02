@@ -125,28 +125,39 @@ menu = option_menu(
     ],
     orientation="horizontal",
     default_index=0,
+
     styles={
+
+        # Background keseluruhan menu
         "container": {
             "padding": "0!important",
-            "background-color": "#ffffff"
+            "background-color": "white!important"
         },
+
+        # Icon
         "icon": {
-            "color": "#2563EB",
+            "color": "black!important",
             "font-size": "20px"
         },
+
+        # Tulisan menu tidak aktif
         "nav-link": {
             "font-size": "18px",
-            "font-weight": "600",
+            "font-weight": "700",
+            "color": "black!important",
+            "background-color": "white!important",
             "text-align": "center",
             "margin": "0px",
-            "padding": "14px",
-            "--hover-color": "#E8F0FE"
+            "padding": "12px"
         },
+
+        # Menu aktif
         "nav-link-selected": {
-            "background-color": "#2563EB",
-            "color": "white",
-            "font-weight": "700"
+            "background-color": "#e5e5e5!important",
+            "color": "black!important",
+            "font-weight": "800"
         }
+
     }
 )
 
