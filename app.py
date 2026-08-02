@@ -208,6 +208,7 @@ if menu == "📂 Dataset":
         "Data Duplikat",
         int(df.duplicated().sum())
     )
+    
     st.divider()
 
     # ======================================================
@@ -224,6 +225,7 @@ if menu == "📂 Dataset":
         df.head(jumlah),
         use_container_width=True
     )
+    
     st.divider()
 
     # ======================================================
@@ -308,6 +310,7 @@ if menu == "📂 Dataset":
 Walaupun pada menu prediksi pengguna dapat memasukkan tahun di atas 2013, model tetap mempelajari pola berdasarkan 
 dataset periode 2011–2013.
 """)
+    
     st.divider()
 
     # ======================================================
@@ -331,6 +334,7 @@ dataset periode 2011–2013.
         st.warning(
             "Masih terdapat missing value."
         )
+        
     st.divider()
 
     # ======================================================
@@ -350,6 +354,7 @@ dataset periode 2011–2013.
         st.warning(
             "Terdapat data duplikat yang sebaiknya dibersihkan."
         )
+        
     st.divider()
 
     # ======================================================
@@ -405,6 +410,7 @@ elif menu == "📊 Statistik":
 - Semakin besar standar deviasi, semakin besar variasi data.
 - Nilai minimum dan maksimum menunjukkan rentang data yang dimiliki masing-masing variabel.
 """)
+    
     st.divider()
 
     # ======================================================
@@ -427,6 +433,7 @@ elif menu == "📊 Statistik":
 - Distribusi yang tidak merata menandakan adanya variasi penjualan antar toko.
 - Nilai penjualan yang tinggi maupun rendah tetap dipelajari oleh model Random Forest.
 """)
+    
     st.divider()
 
     # ======================================================
@@ -443,6 +450,7 @@ elif menu == "📊 Statistik":
 - Titik yang berada di luar whisker menunjukkan nilai yang jauh berbeda dibandingkan sebagian besar data.
 - Random Forest relatif tahan terhadap keberadaan outlier sehingga model masih dapat bekerja dengan baik.
 """)
+    
     st.divider()
 
     # ======================================================
@@ -472,6 +480,7 @@ elif menu == "📊 Statistik":
   dengan rata-rata sekitar **USD ${avg_store.min():,.2f}**.
 - Perbedaan rata-rata penjualan antar store menunjukkan bahwa setiap toko memiliki karakteristik penjualan yang berbeda.
 """)
+    
     st.divider()
 
     # ======================================================
@@ -500,6 +509,7 @@ elif menu == "📊 Statistik":
 - Bulan dengan rata-rata penjualan tinggi menunjukkan periode dengan aktivitas penjualan yang lebih besar.
 - Informasi ini membantu memahami pola musiman (seasonality) pada data.
 """)
+    
     st.divider()
 
     # ======================================================
@@ -528,6 +538,7 @@ elif menu == "📊 Statistik":
         "Maksimum",
         f"USD ${df['Weekly_Sales'].max():,.2f}"
     )
+    
     st.divider()
 
     # ======================================================
@@ -590,6 +601,7 @@ Random Forest Regression dipilih karena mampu menghasilkan prediksi
 yang akurat, stabil, serta dapat menunjukkan variabel mana yang
 paling memengaruhi nilai Weekly Sales.
 """)
+    
     st.divider()
 
     # ======================================================
@@ -646,6 +658,7 @@ Year, Month, dan Week) terhadap nilai Weekly Sales.
     st.success(
         f"Split terbaik berdasarkan nilai R² adalah **{best_split['Split']}**."
     )
+
     st.divider()
 
     # ======================================================
@@ -680,6 +693,7 @@ Year, Month, dan Week) terhadap nilai Weekly Sales.
 - Nilai R² menunjukkan seberapa baik model mampu menjelaskan variasi Weekly Sales.
 - Split data dengan nilai R² tertinggi dipilih sebagai acuan karena memberikan performa terbaik pada data uji.
 """)
+
     st.divider()
 
     # ======================================================
@@ -711,6 +725,7 @@ Nilai korelasi berada pada rentang **-1 sampai 1**.
     ax.set_yticklabels(corr.columns)
     plt.colorbar(im)
     st.pyplot(fig)
+
     st.divider()
 
     # ==========================================
@@ -721,6 +736,7 @@ Nilai korelasi berada pada rentang **-1 sampai 1**.
         corr.round(3),
         use_container_width=True
     )
+
     st.divider()
 
     # ==========================================
@@ -849,6 +865,7 @@ nilai **R²**, maka semakin baik performa model.
 ✅ RMSE : **USD ${rmse:,.2f}**
 ✅ R²   : **{r2:.4f}**
 """)
+
     st.divider()
 
     # ======================================================
@@ -866,6 +883,7 @@ nilai **R²**, maka semakin baik performa model.
     st.caption(
         "Menampilkan 20 data pertama hasil prediksi model."
     )
+
     st.divider()
 
     # ======================================================
@@ -903,6 +921,7 @@ nilai **R²**, maka semakin baik performa model.
 - Penyebaran titik yang rapat di sekitar garis
   menunjukkan model memiliki performa yang baik.
 """)
+
     st.divider()
 
     # ======================================================
@@ -922,6 +941,7 @@ nilai **R²**, maka semakin baik performa model.
     st.caption(
         "Residual Error = Actual - Prediction"
     )
+
     st.divider()
 
     # ======================================================
@@ -944,6 +964,7 @@ nilai **R²**, maka semakin baik performa model.
 - Nilai residual yang mendekati nol menunjukkan prediksi yang baik.
 - Distribusi residual yang menyebar di sekitar nol mengindikasikan model tidak memiliki bias yang besar.
 """)
+
     st.divider()
 
     # ======================================================
@@ -1339,6 +1360,7 @@ else:
             "Kategori Penjualan",
             kategori
         )
+
         st.divider()
         st.subheader("Penjelasan Hasil")
         st.info(f"""
@@ -1375,6 +1397,7 @@ Menu ini berisi ringkasan seluruh proses mulai dari analisis dataset,
 analisis statistik, pembangunan model Machine Learning hingga proses
 prediksi Weekly Sales.
 """)
+
     st.divider()
 
     # ======================================================
