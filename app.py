@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -154,10 +153,8 @@ with tab3:
 # =====================================
 # MODELING
 # =====================================
-
+df_model = df.drop(columns=["Date"], errors="ignore")
 st.header("2. Machine Learning")
-
-df_model = df.drop("Date", axis=1)
 
 X = df_model.drop("Weekly_Sales", axis=1)
 y = df_model["Weekly_Sales"]
