@@ -12,43 +12,53 @@ def style_table(df):
         exclude=["int64", "float64"]
     ).columns
 
-    styler = (
-        df.style
-        # Judul kolom
-        .set_table_styles([
-            {
-                "selector": "th",
-                "props": [
-                    ("text-align", "center"),
-                    ("font-weight", "bold")
-                ]
-            },
-            {
-                "selector": "td",
-                "props": [
-                    ("font-size", "14px")
-                ]
+
+    styler = df.style.set_table_styles([
+
+        # Header kolom
+        {
+            "selector": "th",
+            "props": [
+                ("text-align", "center"),
+                ("font-weight", "bold")
+            ]
+        },
+
+        # Semua isi tabel
+        {
+            "selector": "td",
+            "props": [
+                ("font-size", "14px")
+            ]
+        }
+
+    ])
+
+
+    # Kolom angka rata tengah
+    if len(numeric_cols) > 0:
+
+        styler = styler.set_properties(
+            subset=numeric_cols,
+            **{
+                "text-align": "center !important"
             }
-        ])
-    )
+        )
 
-    # Angka rata tengah
-    styler = styler.set_properties(
-        subset=numeric_cols,
-        **{
-            "text-align": "center"
-        }
-    )
 
-    # Kalimat rata kiri
-    styler = styler.set_properties(
-        subset=text_cols,
-        **{
-            "text-align": "left"
-        }
-    )
+    # Kolom teks rata kiri
+    if len(text_cols) > 0:
+
+        styler = styler.set_properties(
+            subset=text_cols,
+            **{
+                "text-align": "left !important"
+            }
+        )
+
 
     return styler
+
 
 import streamlit as st
 import pandas as pd
@@ -71,7 +81,7 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(
     page_title="Dashboard Prediksi Penjualan Walmart",
-    page_icon="📈",
+    #page_icon="📈",
     layout="wide"
 )
 st.markdown("""
@@ -102,7 +112,7 @@ div.stButton > button p {
 </style>
 """, unsafe_allow_html=True)
 
-st.title("📈 Dashboard Prediksi Penjualan Walmart")
+st.title("Dashboard Prediksi Penjualan Walmart")
 
 st.caption(
     "Analisis Dataset Walmart dan Prediksi Weekly Sales menggunakan Random Forest Regression."
@@ -338,7 +348,7 @@ corr = df_model.corr(
 
 if menu == "Dataset":
 
-    st.header("📂 Dataset Walmart")
+    st.header("Dataset Walmart")
 
     st.markdown("""
     Menu ini menampilkan informasi umum mengenai dataset yang digunakan
