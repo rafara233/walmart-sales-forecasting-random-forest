@@ -1318,7 +1318,6 @@ dilatih menggunakan data Walmart periode **2011–2013**.
     # ======================================================
     # PREDIKSI
     # ======================================================
-
     if st.button("Prediksi Weekly Sales"):
 
         data_baru = pd.DataFrame({
