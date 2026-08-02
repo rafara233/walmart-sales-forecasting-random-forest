@@ -641,7 +641,7 @@ Model akan mempelajari hubungan antara seluruh variabel input
 Year, Month, dan Week) terhadap nilai Weekly Sales.
 """)
     
-   st.divider()
+    st.divider()
 
     # ======================================================
     # PERBANDINGAN SPLIT DATA
