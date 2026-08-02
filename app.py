@@ -9,6 +9,7 @@ from sklearn.metrics import (
     mean_squared_error,
     r2_score
 )
+from streamlit_option_menu import option_menu
 
 import matplotlib.pyplot as plt
 
@@ -25,8 +26,49 @@ st.set_page_config(
 st.title("📈 Dashboard Prediksi Penjualan Walmart")
 
 st.caption(
-    "Analisis Dataset Walmart dan Prediksi Weekly Sales "
-    "menggunakan Random Forest Regression."
+    "Analisis Dataset Walmart dan Prediksi Weekly Sales menggunakan Random Forest Regression."
+)
+menu = option_menu(
+    menu_title=None,
+    options=[
+        "Dataset",
+        "Statistik",
+        "Machine Learning",
+        "Prediksi",
+        "Kesimpulan"
+    ],
+    icons=[
+        "table",
+        "bar-chart",
+        "cpu",
+        "graph-up-arrow",
+        "clipboard-check"
+    ],
+    orientation="horizontal",
+    default_index=0,
+    styles={
+        "container": {
+            "padding": "0!important",
+            "background-color": "#ffffff"
+        },
+        "icon": {
+            "color": "#2563EB",
+            "font-size": "20px"
+        },
+        "nav-link": {
+            "font-size": "18px",
+            "font-weight": "600",
+            "text-align": "center",
+            "margin": "0px",
+            "padding": "14px",
+            "--hover-color": "#E8F0FE"
+        },
+        "nav-link-selected": {
+            "background-color": "#2563EB",
+            "color": "white",
+            "font-weight": "700"
+        }
+    }
 )
 
 # ==========================================================
@@ -201,24 +243,10 @@ corr = df_model.corr(
 )
 
 # ==========================================================
-# SIDEBAR
-# ==========================================================
-
-menu = st.sidebar.radio(
-    "📋 Menu",
-    [
-        "📂 Dataset",
-        "📊 Statistik",
-        "🤖 Machine Learning",
-        "📈 Prediksi",
-        "📄 Kesimpulan"
-    ]
-)
-# ==========================================================
 # MENU DATASET
 # ==========================================================
 
-if menu == "📂 Dataset":
+if menu == "Dataset":
 
     st.header("📂 Dataset Walmart")
 
@@ -475,7 +503,7 @@ dataset periode 2011–2013.
 # MENU STATISTIK
 # ==========================================================
 
-elif menu == "📊 Statistik":
+elif menu == "Statistik":
 
     st.header("📊 Statistik Dataset")
 
@@ -715,7 +743,7 @@ elif menu == "📊 Statistik":
 # MENU MACHINE LEARNING
 # ==========================================================
 
-elif menu == "🤖 Machine Learning":
+elif menu == "Machine Learning":
 
     st.header("🤖 Machine Learning - Random Forest Regression")
 
@@ -1424,7 +1452,7 @@ lebih kecil dibandingkan variabel lainnya.
 # MENU PREDIKSI
 # ==========================================================
 
-elif menu == "📈 Prediksi":
+elif menu == "Prediksi":
 
     st.header("📈 Prediksi Weekly Sales")
 
@@ -1677,7 +1705,7 @@ dibandingkan hanya menggunakan satu Decision Tree.
 # MENU KESIMPULAN
 # ==========================================================
 
-elif menu == "📄 Kesimpulan":
+elif menu == "Kesimpulan":
 
     st.header("📄 Kesimpulan")
 
