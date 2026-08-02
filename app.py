@@ -13,34 +13,44 @@ st.set_page_config(
 
 st.title("📊 Prediksi Penjualan Mingguan Walmart")
 
-uploaded_file = st.file_uploader(
-    "Upload Walmart_Sales.csv",
-    type=["csv"]
-)
+ATA_URL = "https://raw.githubusercontent.com/rafara233/walmart-sales-forecasting-random-forest/main/Walmart_Sales.csv"
 
-if uploaded_file is not None:
+@st.cache_data
+def load_data():
+    return pd.read_csv(DATA_URL)
 
-    df = pd.read_csv(uploaded_file)
+df = load_data()
 
-    st.header("Dataset")
-    st.dataframe(df.head())
+st.header("📄 Dataset")
 
-    st.header("Informasi Data")
+st.dataframe(df.head())
 
-    col1, col2 = st.columns(2)
+st.header("📊 Informasi Dataset")
 
-    with col1:
-        st.write("Jumlah Data")
-        st.write(df.shape)
+col1, col2 = st.columns(2)
 
-        st.write("Missing Value")
-        st.write(df.isnull().sum())
+with col1:
+    st.metric("Jumlah Data", f"{df.shape[0]:,}")
+    st.metric("Jumlah Fitur", df.shape[1])
+    st.metric("Jumlah Store", df["Store"].nunique())
 
-    with col2:
-        st.write("Deskripsi Data")
-        st.dataframe(df.describe())
+with col2:
+    st.metric("Missing Value", int(df.isnull().sum().sum()))
+    st.metric("Data Duplikat", int(df.duplicated().sum()))
+    st.metric("Rata-rata Weekly Sales", f"${df['Weekly_Sales'].mean():,.2f}")
 
-    st.write("Jumlah Duplikat :", df.duplicated().sum())
+st.subheader("Statistik Deskriptif")
+st.dataframe(df.describe())
+
+st.info("""
+### 💡 Insight Dataset
+
+- Dataset berisi data penjualan mingguan Walmart.
+- Dataset memiliki **6.435 baris** dan **8 variabel** sebelum preprocessing.
+- Tidak ditemukan **missing value**, sehingga data siap digunakan tanpa proses imputasi.
+- Tidak ditemukan **data duplikat**, sehingga kualitas data tergolong baik.
+- Target yang akan diprediksi adalah **Weekly_Sales**.
+""")
 
     # ======================
     # Preprocessing
