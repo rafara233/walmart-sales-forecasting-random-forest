@@ -27,7 +27,7 @@ Aplikasi ini melakukan **Exploratory Data Analysis (EDA)** dan
 # GANTI DENGAN LINK RAW DATASET GITHUB
 # ==================================================
 df = pd.read_csv(
-    "https://raw.githubusercontent.com/rafara233/walmart-sales-forecasting-random-forest/main/Walmart_Sales.csv"
+    "https://raw.githubusercontent.com/rafara233/walmart-sales-forecasting-random-forest/refs/heads/main/Walmart_Sales.csv"
 )
 
 # =====================================
