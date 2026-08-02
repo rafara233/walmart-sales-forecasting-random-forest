@@ -93,6 +93,32 @@ df["Year"] = df["Date"].dt.year
 df["Month"] = df["Date"].dt.month
 df["Week"] = df["Date"].dt.isocalendar().week.astype(int)
 
+# Urutkan berdasarkan Store dan Date
+df = df.sort_values(["Store", "Date"])
+
+# Lag Features
+df["Lag_1"] = df.groupby("Store")["Weekly_Sales"].shift(1)
+df["Lag_2"] = df.groupby("Store")["Weekly_Sales"].shift(2)
+
+# Rolling Mean
+df["Rolling_Mean_4"] = (
+    df.groupby("Store")["Weekly_Sales"]
+      .transform(lambda x: x.shift(1).rolling(4).mean())
+)
+
+df["Rolling_Mean_8"] = (
+    df.groupby("Store")["Weekly_Sales"]
+      .transform(lambda x: x.shift(1).rolling(8).mean())
+)
+
+# Rolling Std
+df["Rolling_STD_4"] = (
+    df.groupby("Store")["Weekly_Sales"]
+      .transform(lambda x: x.shift(1).rolling(4).std())
+)
+
+# Hapus baris yang memiliki NaN akibat lag
+df = df.dropna()
 # Visualisasi
 with tab3:
 
