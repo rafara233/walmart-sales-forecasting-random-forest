@@ -6,239 +6,292 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
+import matplotlib.pyplot as plt
+
+# =====================================
+# KONFIGURASI
+# =====================================
 st.set_page_config(
     page_title="Prediksi Penjualan Walmart",
+    page_icon="📈",
     layout="wide"
 )
 
-st.title("📊 Prediksi Penjualan Mingguan Walmart")
+st.title("📈 Dashboard Prediksi Penjualan Walmart")
+st.markdown("""
+Aplikasi ini melakukan **Exploratory Data Analysis (EDA)** dan
+**Prediksi Weekly Sales menggunakan Random Forest Regression**.
+""")
 
-ATA_URL = "https://raw.githubusercontent.com/rafara233/walmart-sales-forecasting-random-forest/main/Walmart_Sales.csv"
+# ==================================================
+# GANTI DENGAN LINK RAW DATASET GITHUB
+# ==================================================
+GITHUB_RAW_URL = "https://raw.githubusercontent.com/username/repository/main/Walmart_Sales.csv"
 
+# =====================================
+# LOAD DATA
+# =====================================
 @st.cache_data
 def load_data():
-    return pd.read_csv(DATA_URL)
+    df = pd.read_csv(GITHUB_RAW_URL)
+    return df
 
 df = load_data()
 
-st.header("📄 Dataset")
+# =====================================
+# EDA
+# =====================================
+st.header("1. Exploratory Data Analysis (EDA)")
 
-st.dataframe(df.head())
+tab1, tab2, tab3 = st.tabs([
+    "Data",
+    "Statistik",
+    "Visualisasi"
+])
 
-st.header("📊 Informasi Dataset")
+with tab1:
 
-col1, col2 = st.columns(2)
+    st.subheader("Preview Dataset")
+    st.dataframe(df.head())
 
-with col1:
-    st.metric("Jumlah Data", f"{df.shape[0]:,}")
-    st.metric("Jumlah Fitur", df.shape[1])
-    st.metric("Jumlah Store", df["Store"].nunique())
+    st.subheader("Informasi Dataset")
 
-with col2:
-    st.metric("Missing Value", int(df.isnull().sum().sum()))
-    st.metric("Data Duplikat", int(df.duplicated().sum()))
-    st.metric("Rata-rata Weekly Sales", f"${df['Weekly_Sales'].mean():,.2f}")
+    info = pd.DataFrame({
+        "Kolom": df.columns,
+        "Tipe Data": df.dtypes.astype(str),
+        "Missing Value": df.isnull().sum().values
+    })
 
-st.subheader("Statistik Deskriptif")
-st.dataframe(df.describe())
+    st.dataframe(info)
 
-st.info("""
-### 💡 Insight Dataset
+    st.metric("Jumlah Duplikat", df.duplicated().sum())
 
-- Dataset berisi data penjualan mingguan Walmart.
-- Dataset memiliki **6.435 baris** dan **8 variabel** sebelum preprocessing.
-- Tidak ditemukan **missing value**, sehingga data siap digunakan tanpa proses imputasi.
-- Tidak ditemukan **data duplikat**, sehingga kualitas data tergolong baik.
-- Target yang akan diprediksi adalah **Weekly_Sales**.
-""")
+    st.info("""
+    **Insight**
+    - Dataset digunakan sebagai dasar pembangunan model prediksi.
+    - Missing value dan data duplikat perlu diperiksa sebelum modeling.
+    """)
 
-    # ======================
-    # Preprocessing
-    # ======================
+with tab2:
 
-    df["Date"] = pd.to_datetime(df["Date"], format="%d-%m-%Y")
+    st.subheader("Statistik Deskriptif")
+    st.dataframe(df.describe())
 
-    df["Year"] = df["Date"].dt.year
-    df["Month"] = df["Date"].dt.month
-    df["Week"] = df["Date"].dt.isocalendar().week.astype(int)
+    st.info("""
+    **Insight**
+    - Statistik deskriptif membantu mengetahui persebaran nilai.
+    - Weekly Sales memiliki rentang nilai yang cukup besar sehingga variasi penjualan antar toko cukup tinggi.
+    """)
 
-    df.drop("Date", axis=1, inplace=True)
+# =====================================
+# PREPROCESSING
+# =====================================
+df["Date"] = pd.to_datetime(df["Date"], format="%d-%m-%Y")
 
-    y = df["Weekly_Sales"]
-    X = df.drop("Weekly_Sales", axis=1)
+df["Year"] = df["Date"].dt.year
+df["Month"] = df["Date"].dt.month
+df["Week"] = df["Date"].dt.isocalendar().week.astype(int)
 
-    # ======================
-    # Perbandingan Split
-    # ======================
+# Visualisasi
+with tab3:
 
-    st.header("Perbandingan Rasio Train Test")
+    st.subheader("Distribusi Weekly Sales")
 
-    split_ratio = {
-        "90:10":0.10,
-        "80:20":0.20,
-        "70:30":0.30,
-        "60:40":0.40
-    }
+    fig, ax = plt.subplots(figsize=(8,4))
+    ax.hist(df["Weekly_Sales"], bins=30)
+    ax.set_xlabel("Weekly Sales")
+    ax.set_ylabel("Jumlah")
+    st.pyplot(fig)
 
-    hasil=[]
+    avg_sales = df.groupby("Store")["Weekly_Sales"].mean()
 
-    for rasio,test_size in split_ratio.items():
+    st.subheader("Rata-rata Penjualan per Store")
 
-        X_train,X_test,y_train,y_test=train_test_split(
-            X,
-            y,
-            test_size=test_size,
-            random_state=42
-        )
+    fig2, ax2 = plt.subplots(figsize=(10,5))
+    avg_sales.plot(kind="bar", ax=ax2)
 
-        model=RandomForestRegressor(
-            n_estimators=100,
-            random_state=42
-        )
+    st.pyplot(fig2)
 
-        model.fit(X_train,y_train)
+    st.info("""
+    **Insight**
+    - Beberapa store memiliki rata-rata penjualan jauh lebih tinggi.
+    - Distribusi penjualan tidak merata sehingga model Machine Learning diperlukan.
+    """)
 
-        pred=model.predict(X_test)
+# =====================================
+# MODELING
+# =====================================
 
-        hasil.append({
-            "Split":rasio,
-            "Train":len(X_train),
-            "Test":len(X_test),
-            "MAE":round(mean_absolute_error(y_test,pred),2),
-            "RMSE":round(np.sqrt(mean_squared_error(y_test,pred)),2),
-            "R2":round(r2_score(y_test,pred),4)
-        })
+st.header("2. Machine Learning")
 
-    hasil_df=pd.DataFrame(hasil)
+df_model = df.drop("Date", axis=1)
 
-    st.dataframe(hasil_df)
+X = df_model.drop("Weekly_Sales", axis=1)
+y = df_model["Weekly_Sales"]
 
-    terbaik=hasil_df.loc[hasil_df["R2"].idxmax()]
+split_ratio = {
+    "90:10":0.10,
+    "80:20":0.20,
+    "70:30":0.30,
+    "60:40":0.40
+}
 
-    st.success(f"Split Terbaik : {terbaik['Split']}")
+hasil = []
 
-    # ======================
-    # Training Model
-    # ======================
+for nama,test_size in split_ratio.items():
 
-    X_train,X_test,y_train,y_test=train_test_split(
+    X_train,X_test,y_train,y_test = train_test_split(
         X,
         y,
-        test_size=0.2,
+        test_size=test_size,
         random_state=42
     )
 
-    model=RandomForestRegressor(
+    model = RandomForestRegressor(
         n_estimators=100,
         random_state=42
     )
 
     model.fit(X_train,y_train)
 
-    pred=model.predict(X_test)
+    pred = model.predict(X_test)
 
-    mae=mean_absolute_error(y_test,pred)
-    rmse=np.sqrt(mean_squared_error(y_test,pred))
-    r2=r2_score(y_test,pred)
+    hasil.append({
+        "Split":nama,
+        "MAE":mean_absolute_error(y_test,pred),
+        "RMSE":np.sqrt(mean_squared_error(y_test,pred)),
+        "R2":r2_score(y_test,pred)
+    })
 
-    st.header("Evaluasi Model")
+hasil_df = pd.DataFrame(hasil)
 
-    c1,c2,c3=st.columns(3)
+st.subheader("Perbandingan Split Data")
 
-    c1.metric("MAE",f"{mae:,.2f}")
-    c2.metric("RMSE",f"{rmse:,.2f}")
-    c3.metric("R²",f"{r2:.4f}")
+st.dataframe(hasil_df)
 
-    # ======================
-    # Feature Importance
-    # ======================
+best = hasil_df.loc[hasil_df["R2"].idxmax()]
 
-    st.header("Feature Importance")
+st.success(f"Split terbaik berdasarkan R² adalah **{best['Split']}**")
 
-    importance=pd.DataFrame({
-        "Feature":X.columns,
-        "Importance":model.feature_importances_
-    }).sort_values(
-        by="Importance",
-        ascending=False
+# =====================================
+# FINAL MODEL
+# =====================================
+
+X_train,X_test,y_train,y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+
+model = RandomForestRegressor(
+    n_estimators=100,
+    random_state=42
+)
+
+model.fit(X_train,y_train)
+
+pred = model.predict(X_test)
+
+mae = mean_absolute_error(y_test,pred)
+rmse = np.sqrt(mean_squared_error(y_test,pred))
+r2 = r2_score(y_test,pred)
+
+st.subheader("Evaluasi Model")
+
+col1,col2,col3 = st.columns(3)
+
+col1.metric("MAE",f"{mae:,.2f}")
+col2.metric("RMSE",f"{rmse:,.2f}")
+col3.metric("R²",f"{r2:.4f}")
+
+st.info("""
+### Insight Model
+- Semakin kecil MAE dan RMSE maka prediksi semakin akurat.
+- Nilai R² yang mendekati 1 menunjukkan model mampu menjelaskan variasi data dengan baik.
+""")
+
+# =====================================
+# FEATURE IMPORTANCE
+# =====================================
+
+importance = pd.DataFrame({
+    "Feature":X.columns,
+    "Importance":model.feature_importances_
+}).sort_values("Importance",ascending=False)
+
+st.subheader("Feature Importance")
+
+fig3,ax3 = plt.subplots(figsize=(8,5))
+
+ax3.barh(
+    importance["Feature"],
+    importance["Importance"]
+)
+
+ax3.invert_yaxis()
+
+st.pyplot(fig3)
+
+st.info("""
+### Insight
+Fitur dengan nilai importance terbesar merupakan faktor yang paling memengaruhi prediksi Weekly Sales.
+""")
+
+# =====================================
+# PREDIKSI
+# =====================================
+
+st.header("3. Prediksi Penjualan")
+
+col1,col2,col3 = st.columns(3)
+
+store = col1.number_input("Store",1,45,5)
+holiday = col2.selectbox("Holiday Flag",[0,1])
+temp = col3.number_input("Temperature",70.0)
+
+fuel = col1.number_input("Fuel Price",3.5)
+cpi = col2.number_input("CPI",210.0)
+unemployment = col3.number_input("Unemployment",6.0)
+
+year = col1.number_input("Year",2010,2025,2012)
+month = col2.number_input("Month",1,12,10)
+week = col3.number_input("Week",1,53,40)
+
+if st.button("Prediksi"):
+
+    data_baru = pd.DataFrame({
+
+        "Store":[store],
+        "Holiday_Flag":[holiday],
+        "Temperature":[temp],
+        "Fuel_Price":[fuel],
+        "CPI":[cpi],
+        "Unemployment":[unemployment],
+        "Year":[year],
+        "Month":[month],
+        "Week":[week]
+
+    })
+
+    prediksi = model.predict(data_baru)
+
+    st.success(
+        f"Estimasi Weekly Sales = **${prediksi[0]:,.2f}**"
     )
 
-    st.dataframe(importance)
+# =====================================
+# KESIMPULAN
+# =====================================
 
-    st.bar_chart(
-        importance.set_index("Feature")
-    )
+st.header("4. Kesimpulan")
 
-    # ======================
-    # Prediksi
-    # ======================
+st.markdown("""
+### Insight Akhir
 
-    st.header("Prediksi Penjualan")
-
-    col1,col2,col3=st.columns(3)
-
-    with col1:
-        store=st.number_input("Store",1,50,5)
-        holiday=st.selectbox(
-            "Holiday Flag",
-            [0,1]
-        )
-        temp=st.number_input(
-            "Temperature",
-            value=72.0
-        )
-        fuel=st.number_input(
-            "Fuel Price",
-            value=3.5
-        )
-
-    with col2:
-        cpi=st.number_input(
-            "CPI",
-            value=210.0
-        )
-        unemployment=st.number_input(
-            "Unemployment",
-            value=6.0
-        )
-        year=st.number_input(
-            "Year",
-            value=2012
-        )
-
-    with col3:
-        month=st.slider(
-            "Month",
-            1,
-            12,
-            10
-        )
-
-        week=st.slider(
-            "Week",
-            1,
-            52,
-            40
-        )
-
-    if st.button("Prediksi"):
-
-        data_baru=pd.DataFrame({
-            "Store":[store],
-            "Holiday_Flag":[holiday],
-            "Temperature":[temp],
-            "Fuel_Price":[fuel],
-            "CPI":[cpi],
-            "Unemployment":[unemployment],
-            "Year":[year],
-            "Month":[month],
-            "Week":[week]
-        })
-
-        data_baru=data_baru[X.columns]
-
-        hasil=model.predict(data_baru)
-
-        st.success(
-            f"Prediksi Penjualan Mingguan = ${hasil[0]:,.2f}"
-        )
+- Dataset Walmart digunakan untuk memprediksi penjualan mingguan (Weekly Sales).
+- Random Forest Regression dipilih karena mampu menangani hubungan non-linear dan menghasilkan performa yang baik.
+- Evaluasi model menggunakan MAE, RMSE, dan R².
+- Feature Importance menunjukkan faktor-faktor yang paling memengaruhi penjualan.
+- Dashboard ini dapat membantu perusahaan memperkirakan penjualan berdasarkan kondisi ekonomi, musim, dan karakteristik toko.
+""")
