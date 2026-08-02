@@ -1350,9 +1350,7 @@ elif hasil < q3:
 else:
     kategori = "🟢 Tinggi"
     
-        st.success(
-            f"Estimasi Weekly Sales : **USD ${hasil:,.2f}**"
-        )
+st.success(f"Estimasi Weekly Sales : **USD ${hasil:,.2f}**")
         col1,col2 = st.columns(2)
         col1.metric(
             "Prediksi Weekly Sales",
