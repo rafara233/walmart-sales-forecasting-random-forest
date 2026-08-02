@@ -1616,15 +1616,15 @@ dilatih menggunakan data Walmart periode **2011–2013**.
         # KATEGORI
         # ==============================================
 
-q1 = df["Weekly_Sales"].quantile(0.25)
-q3 = df["Weekly_Sales"].quantile(0.75)
+        q1 = df["Weekly_Sales"].quantile(0.25)
+        q3 = df["Weekly_Sales"].quantile(0.75)
 
-if hasil < q1:
-    kategori = "🔴 Rendah"
-elif hasil < q3:
-    kategori = "🟡 Sedang"
-else:
-    kategori = "🟢 Tinggi"
+        if hasil < q1:
+            kategori = "🔴 Rendah"
+        elif hasil < q3:
+            kategori = "🟡 Sedang"
+        else:
+            kategori = "🟢 Tinggi"
 
         st.success(
             f"Estimasi Weekly Sales : **USD ${hasil:,.2f}**"
