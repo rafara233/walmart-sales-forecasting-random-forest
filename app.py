@@ -1351,19 +1351,19 @@ else:
     kategori = "🟢 Tinggi"
     
 st.success(f"Estimasi Weekly Sales : **USD ${hasil:,.2f}**")
-        col1,col2 = st.columns(2)
-        col1.metric(
-            "Prediksi Weekly Sales",
-            f"USD ${hasil:,.2f}"
-        )
-        col2.metric(
-            "Kategori Penjualan",
-            kategori
-        )
+    col1,col2 = st.columns(2)
+    col1.metric(
+        "Prediksi Weekly Sales",
+        f"USD ${hasil:,.2f}"
+    )
+    col2.metric(
+        "Kategori Penjualan",
+        kategori
+    )
 
-        st.divider()
-        st.subheader("Penjelasan Hasil")
-        st.info(f"""
+    st.divider()
+    st.subheader("Penjelasan Hasil")
+    st.info(f"""
 Model memperkirakan bahwa nilai **Weekly Sales**
 adalah sekitar **USD ${hasil:,.2f}**.
 Kategori hasil prediksi adalah **{kategori}**.
@@ -1372,11 +1372,11 @@ Prediksi ini diperoleh menggunakan algoritma
 data historis Walmart periode **2011–2013**.
 """)
 
-        st.divider()
+    st.divider()
 
-        st.subheader("Cara Kerja Random Forest")
+    st.subheader("Cara Kerja Random Forest")
 
-        st.markdown("""
+    st.markdown("""
 1. Model menerima seluruh nilai input.
 2. Data diproses oleh banyak Decision Tree.
 3. Setiap Decision Tree menghasilkan prediksi.
