@@ -628,6 +628,7 @@ Model akan mempelajari hubungan antara seluruh variabel input
 (Store, Holiday Flag, Temperature, Fuel Price, CPI, Unemployment,
 Year, Month, dan Week) terhadap nilai Weekly Sales.
 """)
+    
    st.divider()
 
     # ======================================================
