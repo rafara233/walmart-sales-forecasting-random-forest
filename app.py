@@ -397,7 +397,7 @@ if menu == "Dataset":
     )
 
     st.dataframe(
-        style_table(df.head(jumlah)),
+        show_table(df.head(jumlah)),
         use_container_width=True
     )
 
@@ -423,7 +423,7 @@ if menu == "Dataset":
     })
 
     st.dataframe(
-        style_table(info),
+        show_table(info),
         use_container_width=True
     )
 
@@ -468,7 +468,7 @@ if menu == "Dataset":
     })
 
     st.dataframe(
-        style_table(deskripsi),
+        show_table(deskripsi),
         use_container_width=True
     )
 
@@ -523,11 +523,11 @@ dataset periode 2011–2012.
     })
 
     st.dataframe(
-       missing.style.set_properties(
+       show_table(missing.style.set_properties(
           **{
              "text-align": "left"
             }
-        ),
+        )),
         use_container_width=True
     )
 
@@ -636,7 +636,7 @@ elif menu == "Statistik":
     })
 
     st.dataframe(
-        style_table(statistik),
+        show_table(statistik),
         use_container_width=True
     )
 
