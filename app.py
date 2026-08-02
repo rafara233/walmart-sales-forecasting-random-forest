@@ -74,6 +74,38 @@ def style_table(df):
 
     return styler
 
+# ==========================================================
+# FUNGSI FORMAT TABEL
+# ==========================================================
+
+def show_table(df):
+
+    config = {}
+
+    for col in df.columns:
+
+        if pd.api.types.is_numeric_dtype(df[col]):
+
+            config[col] = st.column_config.NumberColumn(
+                label=col,
+                format="%.2f",
+                width="medium"
+            )
+
+        else:
+
+            config[col] = st.column_config.TextColumn(
+                label=col,
+                width="medium"
+            )
+
+
+    st.dataframe(
+        df,
+        column_config=config,
+        use_container_width=True,
+        hide_index=True
+    )
 
 # ==========================================================
 # KONFIGURASI HALAMAN
