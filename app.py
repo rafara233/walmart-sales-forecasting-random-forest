@@ -327,10 +327,12 @@ dataset periode 2011–2013.
         use_container_width=True
     )
     if df.isnull().sum().sum() == 0:
+        
         st.success(
             "Tidak ditemukan missing value pada dataset."
         )
     else:
+        
         st.warning(
             "Masih terdapat missing value."
         )
@@ -347,7 +349,7 @@ dataset periode 2011–2013.
         duplicate
     )
     if duplicate == 0:
-        st.success(
+    st.success(
             "Tidak ditemukan data duplikat."
         )
     else:
