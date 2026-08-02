@@ -26,7 +26,7 @@ Aplikasi ini melakukan **Exploratory Data Analysis (EDA)** dan
 # ==================================================
 # GANTI DENGAN LINK RAW DATASET GITHUB
 # ==================================================
-GITHUB_RAW_URL = "https://raw.githubusercontent.com/username/repository/main/Walmart_Sales.csv"
+GITHUB_RAW_URL = "https://github.com/rafara233/walmart-sales-forecasting-random-forest/blob/main/Walmart_Sales.csv"
 
 # =====================================
 # LOAD DATA
