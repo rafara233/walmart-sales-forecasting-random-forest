@@ -399,10 +399,10 @@ if menu == "Dataset":
 
     st.info("""
 Dataset Walmart yang digunakan pada penelitian ini
-mencakup data penjualan dari **tahun 2011 hingga 2013**.
+mencakup data penjualan dari **tahun 2011 hingga 2012**.
 Walaupun pada menu prediksi pengguna dapat memasukkan tahun
-di atas 2013, model tetap mempelajari pola berdasarkan
-dataset periode 2011–2013.
+di atas 2012, model tetap mempelajari pola berdasarkan
+dataset periode 2011–2012.
 """)
 
     st.divider()
@@ -479,7 +479,7 @@ dataset periode 2011–2013.
    dan **{df.shape[1]} kolom**.
 
 2. Dataset mencakup data penjualan Walmart
-   selama periode **2011–2013**.
+   selama periode **2011–2012**.
 
 3. Dataset digunakan sebagai dasar
    pembangunan model Random Forest Regression.
@@ -1461,7 +1461,7 @@ Menu ini digunakan untuk memperkirakan **Weekly Sales (USD)** berdasarkan
 nilai input yang diberikan pengguna.
 
 Model yang digunakan adalah **Random Forest Regression** yang telah
-dilatih menggunakan data Walmart periode **2011–2013**.
+dilatih menggunakan data Walmart periode **2011–2012**.
 """)
 
     st.info("""
@@ -1471,7 +1471,7 @@ dilatih menggunakan data Walmart periode **2011–2013**.
 2. Pilih Store.
 3. Pilih Holiday Flag.
 4. Isi Temperature, Fuel Price, CPI, dan Unemployment.
-5. Masukkan Tahun (boleh lebih dari 2013).
+5. Masukkan Tahun (boleh lebih dari 2012).
 6. Pilih Month.
 7. Pilih Week sesuai Month.
 8. Klik tombol **Prediksi Weekly Sales**.
@@ -1480,10 +1480,10 @@ dilatih menggunakan data Walmart periode **2011–2013**.
     st.warning("""
 **Catatan**
 
-- Dataset pelatihan hanya mencakup tahun **2011–2013**.
-- Tahun di atas 2013 tetap diperbolehkan sebagai input.
+- Dataset pelatihan hanya mencakup tahun **2011–2012**.
+- Tahun di atas 2012 tetap diperbolehkan sebagai input.
 - Prediksi yang dihasilkan merupakan estimasi berdasarkan pola data
-  tahun 2011–2013, sehingga bukan merupakan nilai aktual.
+  tahun 2011–2012, sehingga bukan merupakan nilai aktual.
 """)
 
     st.divider()
@@ -1582,7 +1582,7 @@ dilatih menggunakan data Walmart periode **2011–2013**.
         "Year",
         min_value=2011,
         max_value=2100,
-        value=2013
+        value=2012
     )
 
     month = col2.selectbox(
@@ -1682,7 +1682,7 @@ Kategori hasil prediksi adalah **{kategori}**.
 
 Prediksi ini diperoleh menggunakan algoritma
 **Random Forest Regression** berdasarkan pola
-data historis Walmart periode **2011–2013**.
+data historis Walmart periode **2011–2012**.
 """)
 
         st.divider()
@@ -1737,7 +1737,7 @@ prediksi Weekly Sales.
 
     col3.metric(
         "Periode Data",
-        "2011 - 2013"
+        "2011 - 2012"
     )
 
     st.success("""
@@ -1745,7 +1745,7 @@ Dataset Walmart berhasil dimuat dan diproses dengan baik.
 
 Dataset terdiri dari data penjualan mingguan (Weekly Sales)
 yang berasal dari beberapa Store Walmart selama periode
-2011–2013.
+2011–2012.
 """)
 
     st.divider()
@@ -1850,7 +1850,7 @@ yang dihitung oleh Random Forest Regression.
     st.subheader("5. Kesimpulan Akhir")
 
     st.success(f"""
-1. Dataset Walmart periode **2011–2013** berhasil digunakan
+1. Dataset Walmart periode **2011–2012** berhasil digunakan
    sebagai dasar pembangunan model prediksi Weekly Sales.
 
 2. Hasil analisis statistik menunjukkan adanya variasi
@@ -1876,9 +1876,9 @@ yang dihitung oleh Random Forest Regression.
    prediksi Weekly Sales dengan memasukkan kondisi yang
    diinginkan.
 
-7. Walaupun pengguna dapat memasukkan tahun di atas 2013,
+7. Walaupun pengguna dapat memasukkan tahun di atas 2012,
    model tetap melakukan prediksi berdasarkan pola data
-   historis periode **2011–2013**, sehingga hasil prediksi
+   historis periode **2011–2012**, sehingga hasil prediksi
    merupakan estimasi dan bukan nilai aktual.
 
 8. Dashboard ini diharapkan dapat membantu dalam proses
