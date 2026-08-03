@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -14,6 +15,59 @@ from streamlit_option_menu import option_menu
 import matplotlib.pyplot as plt
 
 # ==========================================================
+# STYLE TABLE
+# ==========================================================
+
+def style_table(df):
+
+    numeric_cols = df.select_dtypes(
+        include=["int64", "float64"]
+    ).columns
+
+    text_cols = df.select_dtypes(
+        exclude=["int64", "float64"]
+    ).columns
+
+    styler = (
+        df.style
+        # Judul kolom
+        .set_table_styles([
+            {
+                "selector": "th",
+                "props": [
+                    ("text-align", "center"),
+                    ("font-weight", "bold")
+                ]
+            },
+            {
+                "selector": "td",
+                "props": [
+                    ("font-size", "14px")
+                ]
+            }
+        ])
+    )
+
+    # Angka rata tengah
+    styler = styler.set_properties(
+        subset=numeric_cols,
+        **{
+            "text-align": "center"
+        }
+    )
+
+    # Kalimat rata kiri
+    styler = styler.set_properties(
+        subset=text_cols,
+        **{
+            "text-align": "left"
+        }
+    )
+
+    return styler
+
+
+# ==========================================================
 # KONFIGURASI HALAMAN
 # ==========================================================
 
@@ -22,6 +76,33 @@ st.set_page_config(
     page_icon="📈",
     layout="wide"
 )
+st.markdown("""
+<style>
+
+div.stButton > button {
+    color: black !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    background-color: white !important;
+    border: none !important;
+    height: 50px;
+    border-radius: 8px;
+}
+
+/* Saat mouse diarahkan */
+div.stButton > button:hover {
+    color: black !important;
+    background-color: #eeeeee !important;
+}
+
+/* Semua teks pada menu */
+div.stButton > button p {
+    color: black !important;
+    font-weight: 700 !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 st.title("📈 Dashboard Prediksi Penjualan Walmart")
 
@@ -46,28 +127,39 @@ menu = option_menu(
     ],
     orientation="horizontal",
     default_index=0,
+
     styles={
+
+        # Background keseluruhan menu
         "container": {
             "padding": "0!important",
-            "background-color": "#ffffff"
+            "background-color": "white!important"
         },
+
+        # Icon
         "icon": {
-            "color": "#2563EB",
+            "color": "black!important",
             "font-size": "20px"
         },
+
+        # Tulisan menu tidak aktif
         "nav-link": {
             "font-size": "18px",
-            "font-weight": "600",
+            "font-weight": "700",
+            "color": "black!important",
+            "background-color": "white!important",
             "text-align": "center",
             "margin": "0px",
-            "padding": "14px",
-            "--hover-color": "#E8F0FE"
+            "padding": "12px"
         },
+
+        # Menu aktif
         "nav-link-selected": {
-            "background-color": "#2563EB",
-            "color": "white",
-            "font-weight": "700"
+            "background-color": "#e5e5e5!important",
+            "color": "black!important",
+            "font-weight": "800"
         }
+
     }
 )
 
@@ -297,7 +389,7 @@ if menu == "Dataset":
     )
 
     st.dataframe(
-        df.head(jumlah),
+        style_table(df.head(jumlah)),
         use_container_width=True
     )
 
@@ -323,7 +415,7 @@ if menu == "Dataset":
     })
 
     st.dataframe(
-        info,
+        style_table(info),
         use_container_width=True
     )
 
@@ -368,7 +460,7 @@ if menu == "Dataset":
     })
 
     st.dataframe(
-        deskripsi,
+        style_table(deskripsi),
         use_container_width=True
     )
 
@@ -423,7 +515,11 @@ dataset periode 2011–2012.
     })
 
     st.dataframe(
-        missing,
+       missing.style.set_properties(
+          **{
+             "text-align": "left"
+            }
+        ),
         use_container_width=True
     )
 
@@ -532,7 +628,7 @@ elif menu == "Statistik":
     })
 
     st.dataframe(
-        statistik,
+        style_table(statistik),
         use_container_width=True
     )
 
@@ -817,7 +913,7 @@ paling memengaruhi nilai Weekly Sales.
         })
 
         st.dataframe(
-            fitur,
+            style_table(fitur),
             use_container_width=True,
             hide_index=True
         )
@@ -836,7 +932,7 @@ paling memengaruhi nilai Weekly Sales.
         })
 
         st.dataframe(
-            target,
+            style_table(target),
             use_container_width=True,
             hide_index=True
         )
@@ -899,7 +995,7 @@ Year, Month, dan Week) terhadap nilai Weekly Sales.
     })
 
     st.dataframe(
-        metrik,
+        style_table(metrik),
         use_container_width=True,
         hide_index=True
     )
@@ -993,7 +1089,7 @@ Nilai korelasi berada pada rentang **-1 sampai 1**.
     })
 
     st.dataframe(
-        corr_df,
+        style_table(corr_df),
         use_container_width=True,
         hide_index=True
     )
@@ -1027,7 +1123,7 @@ Nilai korelasi berada pada rentang **-1 sampai 1**.
     })
 
     st.dataframe(
-        interpretasi,
+        style_table(interpretasi),
         use_container_width=True,
         hide_index=True
     )
@@ -1142,7 +1238,7 @@ nilai **R²**, maka semakin baik performa model.
     })
 
     st.dataframe(
-        hasil_prediksi.head(20),
+        style_table(hasil_prediksi.head(20)),
         use_container_width=True
     )
 
@@ -1215,7 +1311,7 @@ nilai **R²**, maka semakin baik performa model.
     })
 
     st.dataframe(
-        residual_df.head(20),
+        style_table(residual_df.head(20)),
         use_container_width=True
     )
 
@@ -1414,7 +1510,7 @@ lebih kecil dibandingkan variabel lainnya.
     })
 
     st.dataframe(
-        interpretasi,
+        style_table(interpretasi),
         use_container_width=True,
         hide_index=True
     )
@@ -1523,7 +1619,7 @@ dilatih menggunakan data Walmart periode **2011–2012**.
         })
 
         st.dataframe(
-            contoh,
+            style_table(contoh),
             hide_index=True,
             use_container_width=True
         )
