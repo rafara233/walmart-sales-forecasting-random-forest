@@ -82,7 +82,7 @@ def show_table(df):
 
     config = {}
 
-    for col in df.columns():
+    for col in df.columns:
 
         if pd.api.types.is_numeric_dtype(df[col]):
 
