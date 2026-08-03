@@ -10,8 +10,69 @@ from sklearn.metrics import (
     r2_score
 )
 from streamlit_option_menu import option_menu
+from st_aggrid import AgGrid, GridOptionsBuilder
+from st_aggrid.shared import JsCode
 
 import matplotlib.pyplot as plt
+
+# ==========================================================
+# AGGRID TABLE
+# ==========================================================
+
+from st_aggrid import AgGrid, GridOptionsBuilder
+from st_aggrid.shared import JsCode
+
+
+def show_table(df):
+
+    gb = GridOptionsBuilder.from_dataframe(df)
+
+    gb.configure_default_column(
+        sortable=True,
+        filter=True,
+        resizable=True
+    )
+
+    # Header rata tengah + bold
+    header_style = JsCode("""
+    function(params){
+        params.eGridHeader.style.fontWeight='bold';
+        params.eGridHeader.style.textAlign='center';
+    }
+    """)
+
+    # Format setiap kolom
+    for col in df.columns:
+
+        if pd.api.types.is_numeric_dtype(df[col]):
+
+            gb.configure_column(
+                col,
+                cellStyle={
+                    "textAlign":"center"
+                },
+                headerClass="center-header"
+            )
+
+        else:
+
+            gb.configure_column(
+                col,
+                cellStyle={
+                    "textAlign":"left"
+                },
+                headerClass="center-header"
+            )
+
+    gridOptions = gb.build()
+
+    AgGrid(
+        df,
+        gridOptions=gridOptions,
+        fit_columns_on_grid_load=True,
+        height=min(450, (len(df)+1)*35),
+        allow_unsafe_jscode=True
+    )
 
 # ==========================================================
 # STYLE TABLE
@@ -139,6 +200,11 @@ div.stButton > button:hover {
 div.stButton > button p {
     color: black !important;
     font-weight: 700 !important;
+}
+
+.center-header .ag-header-cell-label{
+    justify-content:center;
+    font-weight:bold;
 }
 
 </style>
