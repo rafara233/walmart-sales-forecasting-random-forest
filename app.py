@@ -9,164 +9,8 @@ from sklearn.metrics import (
     mean_squared_error,
     r2_score
 )
-from streamlit_option_menu import option_menu
-from st_aggrid import AgGrid, GridOptionsBuilder
-from st_aggrid.shared import JsCode
 
 import matplotlib.pyplot as plt
-
-# ==========================================================
-# AGGRID TABLE
-# ==========================================================
-
-from st_aggrid import AgGrid, GridOptionsBuilder
-from st_aggrid.shared import JsCode
-
-
-def show_table(df):
-
-    gb = GridOptionsBuilder.from_dataframe(df)
-
-    gb.configure_default_column(
-        sortable=True,
-        filter=True,
-        resizable=True
-    )
-
-    # Header rata tengah + bold
-    header_style = JsCode("""
-    function(params){
-        params.eGridHeader.style.fontWeight='bold';
-        params.eGridHeader.style.textAlign='center';
-    }
-    """)
-
-    # Format setiap kolom
-    for col in df.columns:
-
-        if pd.api.types.is_numeric_dtype(df[col]):
-
-            gb.configure_column(
-                col,
-                cellStyle={
-                    "textAlign":"center"
-                },
-                headerClass="center-header"
-            )
-
-        else:
-
-            gb.configure_column(
-                col,
-                cellStyle={
-                    "textAlign":"left"
-                },
-                headerClass="center-header"
-            )
-
-    gridOptions = gb.build()
-
-    AgGrid(
-        df,
-        gridOptions=gridOptions,
-        fit_columns_on_grid_load=True,
-        height=min(450, (len(df)+1)*35),
-        allow_unsafe_jscode=True
-    )
-
-# ==========================================================
-# STYLE TABLE
-# ==========================================================
-
-def style_table(df):
-
-    numeric_cols = df.select_dtypes(
-        include=["int64", "float64"]
-    ).columns
-
-    text_cols = df.select_dtypes(
-        exclude=["int64", "float64"]
-    ).columns
-
-
-    styler = df.style.set_table_styles([
-
-        # Header kolom
-        {
-            "selector": "th",
-            "props": [
-                ("text-align", "center"),
-                ("font-weight", "bold")
-            ]
-        },
-
-        # Semua isi tabel
-        {
-            "selector": "td",
-            "props": [
-                ("font-size", "14px")
-            ]
-        }
-
-    ])
-
-
-    # Kolom angka rata tengah
-    if len(numeric_cols) > 0:
-
-        styler = styler.set_properties(
-            subset=numeric_cols,
-            **{
-                "text-align": "center !important"
-            }
-        )
-
-
-    # Kolom teks rata kiri
-    if len(text_cols) > 0:
-
-        styler = styler.set_properties(
-            subset=text_cols,
-            **{
-                "text-align": "left !important"
-            }
-        )
-
-
-    return styler
-
-# ==========================================================
-# FUNGSI FORMAT TABEL
-# ==========================================================
-
-def show_table(df):
-
-    config = {}
-
-    for col in df.columns:
-
-        if pd.api.types.is_numeric_dtype(df[col]):
-
-            config[col] = st.column_config.NumberColumn(
-                label=col,
-                format="%.2f",
-                width="medium"
-            )
-
-        else:
-
-            config[col] = st.column_config.TextColumn(
-                label=col,
-                width="medium"
-            )
-
-
-    st.dataframe(
-        df,
-        column_config=config,
-        use_container_width=True,
-        hide_index=True
-    )
 
 # ==========================================================
 # KONFIGURASI HALAMAN
@@ -174,99 +18,15 @@ def show_table(df):
 
 st.set_page_config(
     page_title="Dashboard Prediksi Penjualan Walmart",
-    #page_icon="📈",
+    page_icon="📈",
     layout="wide"
 )
-st.markdown("""
-<style>
 
-div.stButton > button {
-    color: black !important;
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    background-color: white !important;
-    border: none !important;
-    height: 50px;
-    border-radius: 8px;
-}
-
-/* Saat mouse diarahkan */
-div.stButton > button:hover {
-    color: black !important;
-    background-color: #eeeeee !important;
-}
-
-/* Semua teks pada menu */
-div.stButton > button p {
-    color: black !important;
-    font-weight: 700 !important;
-}
-
-.center-header .ag-header-cell-label{
-    justify-content:center;
-    font-weight:bold;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-st.title("Dashboard Prediksi Penjualan Walmart")
+st.title("📈 Dashboard Prediksi Penjualan Walmart")
 
 st.caption(
-    "Analisis Dataset Walmart dan Prediksi Weekly Sales menggunakan Random Forest Regression."
-)
-menu = option_menu(
-    menu_title=None,
-    options=[
-        "Dataset",
-        "Statistik",
-        "Machine Learning",
-        "Prediksi",
-        "Kesimpulan"
-    ],
-    icons=[
-        "table",
-        "bar-chart",
-        "cpu",
-        "graph-up-arrow",
-        "clipboard-check"
-    ],
-    orientation="horizontal",
-    default_index=0,
-
-    styles={
-
-        # Background keseluruhan menu
-        "container": {
-            "padding": "0!important",
-            "background-color": "white!important"
-        },
-
-        # Icon
-        "icon": {
-            "color": "black!important",
-            "font-size": "20px"
-        },
-
-        # Tulisan menu tidak aktif
-        "nav-link": {
-            "font-size": "18px",
-            "font-weight": "700",
-            "color": "black!important",
-            "background-color": "white!important",
-            "text-align": "center",
-            "margin": "0px",
-            "padding": "12px"
-        },
-
-        # Menu aktif
-        "nav-link-selected": {
-            "background-color": "#e5e5e5!important",
-            "color": "black!important",
-            "font-weight": "800"
-        }
-
-    }
+    "Analisis Dataset Walmart dan Prediksi Weekly Sales "
+    "menggunakan Random Forest Regression."
 )
 
 # ==========================================================
@@ -441,12 +201,27 @@ corr = df_model.corr(
 )
 
 # ==========================================================
+# SIDEBAR
+# ==========================================================
+
+menu = st.sidebar.radio(
+    "📋 Menu",
+    [
+        "📂 Dataset",
+        "📊 Statistik",
+        "🤖 Machine Learning",
+        "📈 Prediksi",
+        "📄 Kesimpulan"
+    ]
+)
+
+# ==========================================================
 # MENU DATASET
 # ==========================================================
 
-if menu == "Dataset":
+if menu == "📂 Dataset":
 
-    st.header("Dataset Walmart")
+    st.header("📂 Dataset Walmart")
 
     st.markdown("""
     Menu ini menampilkan informasi umum mengenai dataset yang digunakan
@@ -495,7 +270,8 @@ if menu == "Dataset":
     )
 
     st.dataframe(
-        show_table(df.head()),
+        df.head(jumlah),
+        use_container_width=True
     )
 
     st.divider()
@@ -520,7 +296,8 @@ if menu == "Dataset":
     })
 
     st.dataframe(
-        show_table(info),
+        info,
+        use_container_width=True
     )
 
     st.divider()
@@ -564,7 +341,8 @@ if menu == "Dataset":
     })
 
     st.dataframe(
-        show_table(deskripsi),
+        deskripsi,
+        use_container_width=True
     )
 
     st.divider()
@@ -594,10 +372,10 @@ if menu == "Dataset":
 
     st.info("""
 Dataset Walmart yang digunakan pada penelitian ini
-mencakup data penjualan dari **tahun 2011 hingga 2012**.
+mencakup data penjualan dari **tahun 2011 hingga 2013**.
 Walaupun pada menu prediksi pengguna dapat memasukkan tahun
-di atas 2012, model tetap mempelajari pola berdasarkan
-dataset periode 2011–2012.
+di atas 2013, model tetap mempelajari pola berdasarkan
+dataset periode 2011–2013.
 """)
 
     st.divider()
@@ -618,11 +396,7 @@ dataset periode 2011–2012.
     })
 
     st.dataframe(
-       show_table(missing.style.set_properties(
-          **{
-             "text-align": "left"
-            }
-        )),
+        missing,
         use_container_width=True
     )
 
@@ -678,7 +452,7 @@ dataset periode 2011–2012.
    dan **{df.shape[1]} kolom**.
 
 2. Dataset mencakup data penjualan Walmart
-   selama periode **2011–2012**.
+   selama periode **2011–2013**.
 
 3. Dataset digunakan sebagai dasar
    pembangunan model Random Forest Regression.
@@ -702,7 +476,7 @@ dataset periode 2011–2012.
 # MENU STATISTIK
 # ==========================================================
 
-elif menu == "Statistik":
+elif menu == "📊 Statistik":
 
     st.header("📊 Statistik Dataset")
 
@@ -731,7 +505,7 @@ elif menu == "Statistik":
     })
 
     st.dataframe(
-        show_table(statistik),
+        statistik,
         use_container_width=True
     )
 
@@ -942,7 +716,7 @@ elif menu == "Statistik":
 # MENU MACHINE LEARNING
 # ==========================================================
 
-elif menu == "Machine Learning":
+elif menu == "🤖 Machine Learning":
 
     st.header("🤖 Machine Learning - Random Forest Regression")
 
@@ -1016,7 +790,7 @@ paling memengaruhi nilai Weekly Sales.
         })
 
         st.dataframe(
-            style_table(fitur),
+            fitur,
             use_container_width=True,
             hide_index=True
         )
@@ -1035,7 +809,7 @@ paling memengaruhi nilai Weekly Sales.
         })
 
         st.dataframe(
-            style_table(target),
+            target,
             use_container_width=True,
             hide_index=True
         )
@@ -1098,7 +872,7 @@ Year, Month, dan Week) terhadap nilai Weekly Sales.
     })
 
     st.dataframe(
-        style_table(metrik),
+        metrik,
         use_container_width=True,
         hide_index=True
     )
@@ -1192,7 +966,7 @@ Nilai korelasi berada pada rentang **-1 sampai 1**.
     })
 
     st.dataframe(
-        style_table(corr_df),
+        corr_df,
         use_container_width=True,
         hide_index=True
     )
@@ -1226,7 +1000,7 @@ Nilai korelasi berada pada rentang **-1 sampai 1**.
     })
 
     st.dataframe(
-        style_table(interpretasi),
+        interpretasi,
         use_container_width=True,
         hide_index=True
     )
@@ -1341,7 +1115,7 @@ nilai **R²**, maka semakin baik performa model.
     })
 
     st.dataframe(
-        style_table(hasil_prediksi.head(20)),
+        hasil_prediksi.head(20),
         use_container_width=True
     )
 
@@ -1414,7 +1188,7 @@ nilai **R²**, maka semakin baik performa model.
     })
 
     st.dataframe(
-        style_table(residual_df.head(20)),
+        residual_df.head(20),
         use_container_width=True
     )
 
@@ -1613,7 +1387,7 @@ lebih kecil dibandingkan variabel lainnya.
     })
 
     st.dataframe(
-        style_table(interpretasi),
+        interpretasi,
         use_container_width=True,
         hide_index=True
     )
@@ -1651,7 +1425,7 @@ lebih kecil dibandingkan variabel lainnya.
 # MENU PREDIKSI
 # ==========================================================
 
-elif menu == "Prediksi":
+elif menu == "📈 Prediksi":
 
     st.header("📈 Prediksi Weekly Sales")
 
@@ -1660,7 +1434,7 @@ Menu ini digunakan untuk memperkirakan **Weekly Sales (USD)** berdasarkan
 nilai input yang diberikan pengguna.
 
 Model yang digunakan adalah **Random Forest Regression** yang telah
-dilatih menggunakan data Walmart periode **2011–2012**.
+dilatih menggunakan data Walmart periode **2011–2013**.
 """)
 
     st.info("""
@@ -1670,7 +1444,7 @@ dilatih menggunakan data Walmart periode **2011–2012**.
 2. Pilih Store.
 3. Pilih Holiday Flag.
 4. Isi Temperature, Fuel Price, CPI, dan Unemployment.
-5. Masukkan Tahun (boleh lebih dari 2012).
+5. Masukkan Tahun (boleh lebih dari 2013).
 6. Pilih Month.
 7. Pilih Week sesuai Month.
 8. Klik tombol **Prediksi Weekly Sales**.
@@ -1679,10 +1453,10 @@ dilatih menggunakan data Walmart periode **2011–2012**.
     st.warning("""
 **Catatan**
 
-- Dataset pelatihan hanya mencakup tahun **2011–2012**.
-- Tahun di atas 2012 tetap diperbolehkan sebagai input.
+- Dataset pelatihan hanya mencakup tahun **2011–2013**.
+- Tahun di atas 2013 tetap diperbolehkan sebagai input.
 - Prediksi yang dihasilkan merupakan estimasi berdasarkan pola data
-  tahun 2011–2012, sehingga bukan merupakan nilai aktual.
+  tahun 2011–2013, sehingga bukan merupakan nilai aktual.
 """)
 
     st.divider()
@@ -1722,7 +1496,7 @@ dilatih menggunakan data Walmart periode **2011–2012**.
         })
 
         st.dataframe(
-            style_table(contoh),
+            contoh,
             hide_index=True,
             use_container_width=True
         )
@@ -1781,7 +1555,7 @@ dilatih menggunakan data Walmart periode **2011–2012**.
         "Year",
         min_value=2011,
         max_value=2100,
-        value=2012
+        value=2013
     )
 
     month = col2.selectbox(
@@ -1852,7 +1626,7 @@ dilatih menggunakan data Walmart periode **2011–2012**.
             kategori = "🟡 Sedang"
         else:
             kategori = "🟢 Tinggi"
-
+            
         st.success(
             f"Estimasi Weekly Sales : **USD ${hasil:,.2f}**"
         )
@@ -1881,7 +1655,7 @@ Kategori hasil prediksi adalah **{kategori}**.
 
 Prediksi ini diperoleh menggunakan algoritma
 **Random Forest Regression** berdasarkan pola
-data historis Walmart periode **2011–2012**.
+data historis Walmart periode **2011–2013**.
 """)
 
         st.divider()
@@ -1904,7 +1678,7 @@ dibandingkan hanya menggunakan satu Decision Tree.
 # MENU KESIMPULAN
 # ==========================================================
 
-elif menu == "Kesimpulan":
+elif menu == "📄 Kesimpulan":
 
     st.header("📄 Kesimpulan")
 
@@ -1936,7 +1710,7 @@ prediksi Weekly Sales.
 
     col3.metric(
         "Periode Data",
-        "2011 - 2012"
+        "2011 - 2013"
     )
 
     st.success("""
@@ -1944,7 +1718,7 @@ Dataset Walmart berhasil dimuat dan diproses dengan baik.
 
 Dataset terdiri dari data penjualan mingguan (Weekly Sales)
 yang berasal dari beberapa Store Walmart selama periode
-2011–2012.
+2011–2013.
 """)
 
     st.divider()
@@ -2049,7 +1823,7 @@ yang dihitung oleh Random Forest Regression.
     st.subheader("5. Kesimpulan Akhir")
 
     st.success(f"""
-1. Dataset Walmart periode **2011–2012** berhasil digunakan
+1. Dataset Walmart periode **2011–2013** berhasil digunakan
    sebagai dasar pembangunan model prediksi Weekly Sales.
 
 2. Hasil analisis statistik menunjukkan adanya variasi
@@ -2075,9 +1849,9 @@ yang dihitung oleh Random Forest Regression.
    prediksi Weekly Sales dengan memasukkan kondisi yang
    diinginkan.
 
-7. Walaupun pengguna dapat memasukkan tahun di atas 2012,
+7. Walaupun pengguna dapat memasukkan tahun di atas 2013,
    model tetap melakukan prediksi berdasarkan pola data
-   historis periode **2011–2012**, sehingga hasil prediksi
+   historis periode **2011–2013**, sehingga hasil prediksi
    merupakan estimasi dan bukan nilai aktual.
 
 8. Dashboard ini diharapkan dapat membantu dalam proses
