@@ -16,7 +16,8 @@ from sklearn.model_selection import train_test_split
 from streamlit_option_menu import option_menu
 
 DATA_URL = (
-    "https://raw.githubusercontent.com/rafara233/walmart-sales-forecasting-random-forest/refs/heads/main/Walmart_Sales.csv"
+    "https://raw.githubusercontent.com/rafara233/"
+    "walmart-sales-forecasting-random-forest/refs/heads/main/Walmart_Sales.csv"
 )
 
 # ----------------------------------------------------------------------------
@@ -111,18 +112,25 @@ def configure_page():
 
         div.stButton > button {{
             font-family: {DISPLAY_FONT};
-            background-color: {INK} !important;
-            color: #F6F5F0 !important;
-            border: none !important;
+            background-color: {CARD} !important;
+            color: {INK} !important;
+            border: 1.5px solid {INK} !important;
             border-radius: 10px !important;
             font-weight: 600 !important;
             height: 46px;
             letter-spacing: 0.02em;
-            transition: background-color 0.15s ease;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }}
+        div.stButton > button p {{
+            color: {INK} !important;
+            font-weight: 600 !important;
         }}
         div.stButton > button:hover {{
             background-color: {ACCENT} !important;
-            color: white !important;
+            border-color: {ACCENT} !important;
+        }}
+        div.stButton > button:hover p {{
+            color: #FFFFFF !important;
         }}
 
         div[data-testid="stDataFrame"] {{
@@ -138,6 +146,16 @@ def configure_page():
         }}
 
         hr {{ border-top: 1px dashed {BORDER} !important; }}
+
+        /* Jaga-jaga: beberapa komponen bawaan Streamlit memakai teks putih
+           yang tidak terlihat di atas background terang tema ini. */
+        p, span, label, li, div[data-testid="stMarkdownContainer"] {{
+            color: {INK};
+        }}
+        div[data-testid="stCaptionContainer"] {{
+            color: {MUTED} !important;
+        }}
+        iframe {{ color-scheme: light; }}
 
         #MainMenu, footer {{ visibility: hidden; }}
         </style>
@@ -722,7 +740,9 @@ def main():
                 "background-color": CARD,
                 "border-radius": "14px",
                 "border": f"1px solid {BORDER}",
+                "overflow": "hidden",
             },
+            "nav": {"background-color": "transparent"},
             "icon": {"color": MUTED, "font-size": "16px"},
             "nav-link": {
                 "font-family": DISPLAY_FONT,
