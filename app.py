@@ -567,6 +567,23 @@ def page_statistik(df: pd.DataFrame):
     m4.metric("Min", f"${df['Weekly_Sales'].min():,.0f}")
     m5.metric("Max", f"${df['Weekly_Sales'].max():,.0f}")
 
+    st.markdown("""
+    <style>
+    /* Judul metric */
+    [data-testid="stMetricLabel"] {font-size: 14px !important;}
+
+    /* Nilai metric */
+    [data-testid="stMetricValue"] {
+        font-size: 20px !important;   /* ubah sesuai kebutuhan */
+        font-weight: 600 !important;
+    }
+
+    /* Delta (jika ada) */
+    [data-testid="stMetricDelta"] {
+        font-size: 12px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # ----------------------------------------------------------------------------
 # HALAMAN: MACHINE LEARNING
