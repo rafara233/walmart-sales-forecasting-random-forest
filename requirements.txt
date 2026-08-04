@@ -3,5 +3,5 @@ pandas
 numpy
 scikit-learn
 matplotlib
+plotly
 streamlit-option-menu
-streamlit-aggrid
