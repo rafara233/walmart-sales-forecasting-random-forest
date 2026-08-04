@@ -286,6 +286,7 @@ def page_dataset(df: pd.DataFrame):
         "01 · DATASET",
         "Dataset Walmart",
         "Data mentah di balik dashboard ini cakupan, kelengkapan, dan arti tiap kolom, sebelum masuk ke tahap analisis dan pemodelan.",
+        "Sumber Dataset : Kaggle",
     )
 
     c1, c2, c3, c4 = st.columns(4)
@@ -346,7 +347,7 @@ def page_dataset(df: pd.DataFrame):
     a, b = st.columns(2)
     with a:
         if miss_ok:
-            st.success("Tidak ada missing value  data siap dipakai apa adanya.")
+            st.success("Tidak ada missing value  data.")
         else:
             st.warning("Masih ada missing value yang perlu ditangani sebelum pemodelan.")
     with b:
@@ -371,8 +372,7 @@ def page_statistik(df: pd.DataFrame):
     page_header(
         "02 · STATISTIK",
         "Statistik Deskriptif",
-        "Melihat sebaran dan pola Weekly Sales sebelum data dilempar ke algoritma  "
-        "titik awal untuk memahami apa yang sebenarnya sedang dipelajari model.",
+        "Melihat sebaran dan pola Weekly Sales sebelum data dilempar ke algoritma titik awal untuk memahami apa yang sebenarnya sedang dipelajari model.",
     )
 
     st.subheader("Ringkasan per variabel")
