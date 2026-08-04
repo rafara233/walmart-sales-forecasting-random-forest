@@ -741,8 +741,8 @@ def main():
                 "box-shadow": "none",        # hilangkan shadow
             },
             "nav": {
-                "background-color": PAPER,
-                "border": "none",
+                "background-color": "#FFFFFF",   # ganti warna kotak
+                "border-radius": "14px",
             },
             "icon": {
                 "color": MUTED,
