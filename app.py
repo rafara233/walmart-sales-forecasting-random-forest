@@ -16,8 +16,7 @@ from sklearn.model_selection import train_test_split
 from streamlit_option_menu import option_menu
 
 DATA_URL = (
-    "https://raw.githubusercontent.com/rafara233/"
-    "walmart-sales-forecasting-random-forest/refs/heads/main/Walmart_Sales.csv"
+    "https://raw.githubusercontent.com/rafara233/walmart-sales-forecasting-random-forest/refs/heads/main/Walmart_Sales.csv"
 )
 
 # ----------------------------------------------------------------------------
@@ -286,8 +285,7 @@ def page_dataset(df: pd.DataFrame):
     page_header(
         "01 · DATASET",
         "Dataset Walmart",
-        "Data mentah di balik dashboard ini — cakupan, kelengkapan, dan arti tiap kolom, "
-        "sebelum masuk ke tahap analisis dan pemodelan.",
+        "Data mentah di balik dashboard ini cakupan, kelengkapan, dan arti tiap kolom, sebelum masuk ke tahap analisis dan pemodelan.",
     )
 
     c1, c2, c3, c4 = st.columns(4)
@@ -331,7 +329,7 @@ def page_dataset(df: pd.DataFrame):
                     "Harga bahan bakar regional",
                     "Consumer Price Index",
                     "Tingkat pengangguran regional",
-                    "Total penjualan mingguan (USD) — target prediksi",
+                    "Total penjualan mingguan (USD)  target prediksi",
                     "Tahun, diturunkan dari Date",
                     "Bulan, diturunkan dari Date",
                     "Minggu ke-berapa dalam setahun",
@@ -348,7 +346,7 @@ def page_dataset(df: pd.DataFrame):
     a, b = st.columns(2)
     with a:
         if miss_ok:
-            st.success("Tidak ada missing value — data siap dipakai apa adanya.")
+            st.success("Tidak ada missing value  data siap dipakai apa adanya.")
         else:
             st.warning("Masih ada missing value yang perlu ditangani sebelum pemodelan.")
     with b:
@@ -360,8 +358,8 @@ def page_dataset(df: pd.DataFrame):
     st.info(
         f"Dataset mencakup **{df['Store'].nunique()} toko** sepanjang periode "
         f"**{int(df['Year'].min())}–{int(df['Year'].max())}**, dengan Weekly Sales sebagai "
-        "variabel target dan sembilan variabel lain — Store, Holiday Flag, Temperature, "
-        "Fuel Price, CPI, Unemployment, Year, Month, Week — sebagai fitur untuk model."
+        "variabel target dan sembilan variabel lain  Store, Holiday Flag, Temperature, "
+        "Fuel Price, CPI, Unemployment, Year, Month, Week  sebagai fitur untuk model."
     )
 
 
@@ -373,7 +371,7 @@ def page_statistik(df: pd.DataFrame):
     page_header(
         "02 · STATISTIK",
         "Statistik Deskriptif",
-        "Melihat sebaran dan pola Weekly Sales sebelum data dilempar ke algoritma — "
+        "Melihat sebaran dan pola Weekly Sales sebelum data dilempar ke algoritma  "
         "titik awal untuk memahami apa yang sebenarnya sedang dipelajari model.",
     )
 
@@ -386,7 +384,7 @@ def page_statistik(df: pd.DataFrame):
     )
     st.dataframe(style_table(statistik), use_container_width=True)
     st.caption(
-        "Standar deviasi yang besar menandakan penjualan bervariasi tajam antar toko dan waktu — "
+        "Standar deviasi yang besar menandakan penjualan bervariasi tajam antar toko dan waktu  "
         "sinyal awal bahwa hubungan di data ini tidak akan sesederhana garis lurus."
     )
 
@@ -419,7 +417,7 @@ def page_statistik(df: pd.DataFrame):
         f"Store **{avg_store.idxmax()}** memimpin dengan rata-rata sekitar "
         f"**USD ${avg_store.max():,.0f}** per minggu, sementara Store **{avg_store.idxmin()}** "
         f"berada di ujung bawah pada **USD ${avg_store.min():,.0f}**. Rentang sejauh ini menunjukkan "
-        "tiap toko punya karakter penjualan sendiri — bukan hanya soal lokasi, tapi juga musim dan kondisi ekonomi lokal."
+        "tiap toko punya karakter penjualan sendiri  bukan hanya soal lokasi, tapi juga musim dan kondisi ekonomi lokal."
     )
 
     st.divider()
@@ -466,7 +464,7 @@ def page_ml(df: pd.DataFrame, results: dict):
         "Random Forest bekerja dengan membangun banyak *decision tree* dari sampel data yang "
         "sedikit berbeda-beda, lalu merata-ratakan prediksi seluruh pohon. Pendekatan ini dipilih "
         "karena tahan terhadap outlier, tidak menuntut data dinormalisasi lebih dulu, dan bisa "
-        "menangkap hubungan non-linear antar variabel — sesuatu yang tidak selalu terlihat dari "
+        "menangkap hubungan non-linear antar variabel  sesuatu yang tidak selalu terlihat dari "
         "korelasi biasa."
     )
 
@@ -505,7 +503,7 @@ def page_ml(df: pd.DataFrame, results: dict):
         terbesar = corr_target.abs().idxmax()
         st.caption(
             f"**{terbesar}** punya korelasi linear terkuat terhadap Weekly Sales "
-            f"({corr_target[terbesar]:.2f}). Tapi korelasi rendah bukan berarti tidak penting — "
+            f"({corr_target[terbesar]:.2f}). Tapi korelasi rendah bukan berarti tidak penting  "
             "Random Forest bisa menangkap pola non-linear yang luput dari angka ini."
         )
 
@@ -536,7 +534,7 @@ def page_ml(df: pd.DataFrame, results: dict):
 
     st.markdown(
         "Titik-titik pada scatter plot berkumpul rapat di sekitar garis diagonal, dan residual "
-        "menyebar cukup simetris di sekitar nol — tanda model tidak condong terlalu tinggi atau "
+        "menyebar cukup simetris di sekitar nol  tanda model tidak condong terlalu tinggi atau "
         "terlalu rendah secara sistematis."
     )
 
@@ -560,14 +558,14 @@ def page_ml(df: pd.DataFrame, results: dict):
     with lcol3:
         st.warning(
             f"**{low_feat['Feature']}** berkontribusi paling kecil "
-            f"({low_feat['Importance']:.3f}) — tetap dipakai model, hanya pengaruhnya lebih tipis."
+            f"({low_feat['Importance']:.3f})  tetap dipakai model, hanya pengaruhnya lebih tipis."
         )
 
     with st.expander("Kenapa hasil feature importance bisa beda dari tabel korelasi?"):
         st.write(
             "Korelasi hanya menangkap hubungan garis lurus antara dua variabel. Random Forest "
             "menilai kontribusi variabel lewat seberapa sering dan seberapa efektif ia dipakai "
-            "untuk memecah data di dalam pohon keputusan — termasuk pola musiman atau interaksi "
+            "untuk memecah data di dalam pohon keputusan  termasuk pola musiman atau interaksi "
             "antar variabel yang tidak linear. Karena itu urutan pentingnya bisa berbeda."
         )
 
@@ -641,7 +639,7 @@ def page_prediksi(df: pd.DataFrame, results: dict):
             f"Berdasarkan kondisi yang dimasukkan, model memperkirakan penjualan mingguan Store "
             f"**{store}** berada pada kisaran **{kategori.lower()}** dibanding toko-toko lain dalam "
             "dataset. Angka ini adalah rata-rata dari seluruh pohon keputusan dalam model, dilatih "
-            "dari pola historis 2011–2012 — jadi paling akurat untuk kondisi yang mirip rentang data itu."
+            "dari pola historis 2011–2012  jadi paling akurat untuk kondisi yang mirip rentang data itu."
         )
 
     st.caption(
@@ -663,7 +661,7 @@ def page_kesimpulan(df: pd.DataFrame, results: dict):
     page_header(
         "05 · RINGKASAN",
         "Kesimpulan",
-        "Rangkuman singkat dari seluruh alur — dari data mentah sampai model siap dipakai.",
+        "Rangkuman singkat dari seluruh alur  dari data mentah sampai model siap dipakai.",
     )
 
     c1, c2, c3 = st.columns(3)
@@ -675,7 +673,7 @@ def page_kesimpulan(df: pd.DataFrame, results: dict):
         f"Dashboard ini dibangun di atas **{len(df):,} baris** data penjualan mingguan dari "
         f"**{df['Store'].nunique()} toko** Walmart. Setelah eksplorasi data dan statistik deskriptif "
         "menunjukkan variasi penjualan yang cukup besar antar toko dan antar bulan, pendekatan "
-        "Machine Learning — khususnya **Random Forest Regression** — dipilih karena mampu menangani "
+        "Machine Learning  khususnya **Random Forest Regression**  dipilih karena mampu menangani "
         "hubungan non-linear tanpa perlu banyak pra-pemrosesan."
     )
 
@@ -707,7 +705,7 @@ def page_kesimpulan(df: pd.DataFrame, results: dict):
 
     st.success(
         "Secara keseluruhan, dashboard ini memberi gambaran menyeluruh dari data mentah, statistik, "
-        "hingga model siap pakai — cukup untuk eksplorasi awal maupun simulasi skenario penjualan mingguan."
+        "hingga model siap pakai  cukup untuk eksplorasi awal maupun simulasi skenario penjualan mingguan."
     )
 
     st.balloons()
