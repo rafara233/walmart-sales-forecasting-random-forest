@@ -726,48 +726,48 @@ def main():
         unsafe_allow_html=True,
     )
 
-menu = option_menu(
-    menu_title=None,
-    options=["Dataset", "Statistik", "Machine Learning", "Prediksi", "Kesimpulan"],
-    icons=["table", "bar-chart", "cpu", "graph-up-arrow", "clipboard-check"],
-    orientation="horizontal",
-    default_index=0,
-    styles={
-        "container": {
-            "padding": "6px",
-            "background-color": PAPER,   # ganti background menu
-            "border": "none",            # hilangkan border hitam
-            "border-radius": "14px",
-            "box-shadow": "none",        # hilangkan shadow
+    menu = option_menu(
+        menu_title=None,
+        options=["Dataset", "Statistik", "Machine Learning", "Prediksi", "Kesimpulan"],
+        icons=["table", "bar-chart", "cpu", "graph-up-arrow", "clipboard-check"],
+        orientation="horizontal",
+        default_index=0,
+        styles={
+            "container": {
+                "padding": "6px",
+                "background-color": PAPER,   # ganti background menu
+                "border": "none",            # hilangkan border hitam
+                "border-radius": "14px",
+                "box-shadow": "none",        # hilangkan shadow
+            },
+            "nav": {
+                "background-color": PAPER,
+                "border": "none",
+            },
+            "icon": {
+                "color": MUTED,
+                "font-size": "16px",
+            },
+            "nav-link": {
+                "font-family": DISPLAY_FONT,
+                "font-size": "15px",
+                "font-weight": "600",
+                "color": INK,
+                "background-color": PAPER,
+                "text-align": "center",
+                "margin": "2px",
+                "padding": "10px 14px",
+                "border-radius": "10px",
+                "border": "none",
+            },
+            "nav-link-selected": {
+                "background-color": ACCENT,
+                "color": "#FFFFFF",
+                "font-weight": "700",
+                "border": "none",
+            },
         },
-        "nav": {
-            "background-color": PAPER,
-            "border": "none",
-        },
-        "icon": {
-            "color": MUTED,
-            "font-size": "16px",
-        },
-        "nav-link": {
-            "font-family": DISPLAY_FONT,
-            "font-size": "15px",
-            "font-weight": "600",
-            "color": INK,
-            "background-color": PAPER,
-            "text-align": "center",
-            "margin": "2px",
-            "padding": "10px 14px",
-            "border-radius": "10px",
-            "border": "none",
-        },
-        "nav-link-selected": {
-            "background-color": ACCENT,
-            "color": "#FFFFFF",
-            "font-weight": "700",
-            "border": "none",
-        },
-    },
-)
+    )
 
     df = load_data()
     results = train_models(df)
