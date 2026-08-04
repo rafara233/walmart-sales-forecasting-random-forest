@@ -13,8 +13,6 @@ import streamlit as st
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
-from streamlit_option_menu import option_menu
-
 DATA_URL = (
     "https://raw.githubusercontent.com/rafara233/"
     "walmart-sales-forecasting-random-forest/refs/heads/main/Walmart_Sales.csv"
@@ -81,8 +79,10 @@ def configure_page():
         .lede {{
             color: {MUTED};
             font-size: 1.02rem;
-            max-width: 780px;
-            line-height: 1.55;
+            max-width: 68ch;
+            width: 100%;
+            line-height: 1.6;
+            text-wrap: pretty;
         }}
 
         div[data-testid="stMetric"] {{
@@ -114,23 +114,65 @@ def configure_page():
             font-family: {DISPLAY_FONT};
             background-color: {CARD} !important;
             color: {INK} !important;
-            border: 1.5px solid {INK} !important;
+            border: 1.5px solid {BORDER} !important;
             border-radius: 10px !important;
             font-weight: 600 !important;
             height: 46px;
             letter-spacing: 0.02em;
-            transition: background-color 0.15s ease, color 0.15s ease;
+            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
         }}
         div.stButton > button p {{
             color: {INK} !important;
             font-weight: 600 !important;
         }}
         div.stButton > button:hover {{
-            background-color: {ACCENT} !important;
+            background-color: {CARD} !important;
             border-color: {ACCENT} !important;
         }}
         div.stButton > button:hover p {{
+            color: {ACCENT} !important;
+        }}
+
+        /* Tombol aksi utama (mis. "Hitung Prediksi" & item navbar aktif) */
+        div.stButton > button[kind="primary"] {{
+            background-color: {ACCENT} !important;
+            border-color: {ACCENT} !important;
+        }}
+        div.stButton > button[kind="primary"] p {{
             color: #FFFFFF !important;
+        }}
+        div.stButton > button[kind="primary"]:hover {{
+            background-color: {INK} !important;
+            border-color: {INK} !important;
+        }}
+        div.stButton > button[kind="primary"]:hover p {{
+            color: #FFFFFF !important;
+        }}
+
+        /* ---------- Navbar kustom (pengganti komponen pihak ketiga) ----------
+           Dibungkus st.container(border=True) supaya benar-benar bersarang
+           di DOM, jadi CSS-nya bisa menarget wrapper asli itu. */
+        div[data-testid="stVerticalBlockBorderWrapper"] {{
+            background: {CARD};
+            border: 1px solid {BORDER} !important;
+            border-radius: 14px !important;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 1px 2px rgba(19,42,58,0.05);
+        }}
+        div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stHorizontalBlock"] {{
+            gap: 0.35rem;
+        }}
+        div[data-testid="stVerticalBlockBorderWrapper"] div.stButton > button {{
+            border: none !important;
+            border-radius: 10px !important;
+            height: 44px;
+            font-size: 14.5px !important;
+        }}
+        div[data-testid="stVerticalBlockBorderWrapper"] div.stButton > button:hover {{
+            background-color: {PAPER} !important;
+        }}
+        div[data-testid="stVerticalBlockBorderWrapper"] div.stButton > button[kind="primary"] {{
+            box-shadow: 0 1px 3px rgba(47,111,82,0.35);
         }}
 
         div[data-testid="stDataFrame"] {{
@@ -208,26 +250,24 @@ def configure_page():
                 font-size: 0.92rem !important;
             }}
 
-            /* Menu jadi baris yang bisa digeser, bukan dipepetkan */
-            div[data-testid="stHorizontalBlock"] .nav {{
+            /* Navbar tetap satu baris dan bisa digeser ke samping,
+               bukan menumpuk vertikal atau dipepetkan sampai terpotong */
+            div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stHorizontalBlock"] {{
                 flex-wrap: nowrap !important;
                 overflow-x: auto !important;
                 -webkit-overflow-scrolling: touch;
+                padding-bottom: 2px;
             }}
-            ul.nav {{
-                flex-wrap: nowrap !important;
-                overflow-x: auto !important;
-            }}
-            ul.nav li {{
+            div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stColumn"],
+            div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="column"] {{
+                width: auto !important;
                 flex: 0 0 auto !important;
+                min-width: 128px;
             }}
-            ul.nav a.nav-link {{
+            div[data-testid="stVerticalBlockBorderWrapper"] div.stButton > button {{
                 font-size: 12.5px !important;
-                padding: 8px 10px !important;
+                padding: 0 12px !important;
                 white-space: nowrap;
-            }}
-            ul.nav a.nav-link svg, ul.nav a.nav-link i {{
-                font-size: 13px !important;
             }}
 
             /* Grafik Plotly: beri sedikit ruang lebih agar sumbu tetap
@@ -699,7 +739,7 @@ def page_prediksi(df: pd.DataFrame, results: dict):
 
     st.divider()
 
-    if st.button("Hitung Prediksi"):
+    if st.button("Hitung Prediksi", type="primary"):
         data_baru = pd.DataFrame(
             {
                 "Store": [store], "Holiday_Flag": [holiday], "Temperature": [temperature],
@@ -801,6 +841,39 @@ def page_kesimpulan(df: pd.DataFrame, results: dict):
 
 
 # ----------------------------------------------------------------------------
+# NAVBAR (native Streamlit, tanpa komponen pihak ketiga)
+# ----------------------------------------------------------------------------
+
+NAV_ITEMS = [
+    ("Dataset", "🗂️"),
+    ("Statistik", "📊"),
+    ("Machine Learning", "🧠"),
+    ("Prediksi", "🎯"),
+    ("Kesimpulan", "📄"),
+]
+
+
+def render_navbar() -> str:
+    if "menu" not in st.session_state:
+        st.session_state.menu = NAV_ITEMS[0][0]
+
+    with st.container(border=True):
+        cols = st.columns(len(NAV_ITEMS))
+        for col, (label, icon) in zip(cols, NAV_ITEMS):
+            is_active = st.session_state.menu == label
+            with col:
+                if st.button(
+                    f"{icon}  {label}",
+                    key=f"nav_{label}",
+                    use_container_width=True,
+                    type="primary" if is_active else "secondary",
+                ):
+                    st.session_state.menu = label
+
+    return st.session_state.menu
+
+
+# ----------------------------------------------------------------------------
 # MAIN
 # ----------------------------------------------------------------------------
 
@@ -815,40 +888,7 @@ def main():
         unsafe_allow_html=True,
     )
 
-    menu = option_menu(
-        menu_title=None,
-        options=["Dataset", "Statistik", "Machine Learning", "Prediksi", "Kesimpulan"],
-        icons=["table", "bar-chart", "cpu", "graph-up-arrow", "clipboard-check"],
-        orientation="horizontal",
-        default_index=0,
-        styles={
-            "container": {
-                "padding": "6px",
-                "background-color": CARD,
-                "border-radius": "14px",
-                "border": f"1px solid {BORDER}",
-                "overflow": "hidden",
-            },
-            "nav": {"background-color": "transparent"},
-            "icon": {"color": MUTED, "font-size": "16px"},
-            "nav-link": {
-                "font-family": DISPLAY_FONT,
-                "font-size": "15px",
-                "font-weight": "600",
-                "color": INK,
-                "background-color": "transparent",
-                "text-align": "center",
-                "margin": "2px",
-                "padding": "10px 14px",
-                "border-radius": "10px",
-            },
-            "nav-link-selected": {
-                "background-color": ACCENT,
-                "color": "#FFFFFF",
-                "font-weight": "700",
-            },
-        },
-    )
+    menu = render_navbar()
 
     df = load_data()
     results = train_models(df)
