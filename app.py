@@ -16,8 +16,7 @@ from sklearn.model_selection import train_test_split
 from streamlit_option_menu import option_menu
 
 DATA_URL = (
-    "https://raw.githubusercontent.com/rafara233/"
-    "walmart-sales-forecasting-random-forest/refs/heads/main/Walmart_Sales.csv"
+    "https://raw.githubusercontent.com/rafara233/walmart-sales-forecasting-random-forest/refs/heads/main/Walmart_Sales.csv"
 )
 
 # ----------------------------------------------------------------------------
