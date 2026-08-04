@@ -602,8 +602,7 @@ def page_ml(df: pd.DataFrame, results: dict):
     page_header(
         "03 · MODEL",
         "Random Forest Regression",
-        "Bagaimana model dibangun, seberapa baik performanya, dan variabel mana yang "
-        "sebenarnya menggerakkan angka Weekly Sales.",
+        "Bagaimana model dibangun, seberapa baik performanya, dan variabel mana yang sebenarnya menggerakkan angka Weekly Sales.",
     )
 
     st.markdown(
