@@ -286,7 +286,7 @@ def page_dataset(df: pd.DataFrame):
         "01 · DATASET",
         "Dataset Walmart",
         "Data mentah di balik dashboard ini cakupan, kelengkapan, dan arti tiap kolom, sebelum masuk ke tahap analisis dan pemodelan.",
-        "Sumber Dataset : Kaggle",
+        "Sumber Dataset : Kaggle"
     )
 
     c1, c2, c3, c4 = st.columns(4)
