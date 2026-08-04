@@ -239,51 +239,58 @@ def load_data() -> pd.DataFrame:
 
 @st.cache_resource
 def train_models(df: pd.DataFrame) -> dict:
-    X = df.drop("Weekly_Sales", axis=1)
-    y = df["Weekly_Sales"]
-    
-    best_r2 = -np.inf
-    best_model = None
-    best_split_ratio = None
-    all_results = []
+    df_model = df.drop(columns=["Date"])
+    X = df_model.drop(columns=["Weekly_Sales"])
+    y = df_model["Weekly_Sales"]
 
-    for split_ratio in [0.15, 0.20, 0.25, 0.30]:
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=split_ratio, random_state=42
+    split_ratio = {"90 : 10": 0.10, "80 : 20": 0.20, "70 : 30": 0.30, "60 : 40": 0.40}
+    hasil_split = []
+    for nama, test_size in split_ratio.items():
+        Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=test_size, random_state=42)
+        rf = RandomForestRegressor(n_estimators=100, random_state=42)
+        rf.fit(Xtr, ytr)
+        pred = rf.predict(Xte)
+        hasil_split.append(
+            {
+                "Split": nama,
+                "MAE": mean_absolute_error(yte, pred),
+                "RMSE": np.sqrt(mean_squared_error(yte, pred)),
+                "R²": r2_score(yte, pred),
+            }
         )
-        
-        model = RandomForestRegressor(n_estimators=100, max_depth=20, random_state=42)
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        
-        mae = mean_absolute_error(y_test, y_pred)
-        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-        r2 = r2_score(y_test, y_pred)
-        
-        all_results.append({"Split": f"{split_ratio:.0%}", "Test Size": split_ratio, "MAE": mae, "RMSE": rmse, "R²": r2})
-        
-        if r2 > best_r2:
-            best_r2 = r2
-            best_model = model
-            best_split_ratio = split_ratio
-            best_mae = mae
-            best_rmse = rmse
+    hasil_split = pd.DataFrame(hasil_split)
+    best_split = hasil_split.loc[hasil_split["R²"].idxmax()]
 
-    feature_importance = pd.DataFrame({
-        "Feature": X.columns,
-        "Importance": best_model.feature_importances_,
-    }).sort_values("Importance", ascending=False).reset_index(drop=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+    pred = model.predict(X_test)
 
-    results_df = pd.DataFrame(all_results).sort_values("R²", ascending=False).reset_index(drop=True)
+    mae = mean_absolute_error(y_test, pred)
+    rmse = np.sqrt(mean_squared_error(y_test, pred))
+    r2 = r2_score(y_test, pred)
+
+    feature_importance = pd.DataFrame(
+        {"Feature": X.columns, "Importance": model.feature_importances_}
+    ).sort_values("Importance", ascending=False)
+
+    corr = df_model.corr(numeric_only=True)
 
     return {
-        "model": best_model,
-        "mae": best_mae,
-        "rmse": best_rmse,
-        "r2": best_r2,
-        "best_split": {"Split": f"{best_split_ratio:.0%}", "Test Size": best_split_ratio},
+        "df_model": df_model,
+        "X": X,
+        "y": y,
+        "hasil_split": hasil_split,
+        "best_split": best_split,
+        "model": model,
+        "X_test": X_test,
+        "y_test": y_test,
+        "pred": pred,
+        "mae": mae,
+        "rmse": rmse,
+        "r2": r2,
         "feature_importance": feature_importance,
-        "results": results_df,
+        "corr": corr,
     }
 
 
