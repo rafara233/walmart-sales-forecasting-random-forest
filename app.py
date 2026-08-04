@@ -544,7 +544,7 @@ def page_statistik(df: pd.DataFrame):
     st.plotly_chart(themed_chart(fig3, height=400), use_container_width=True)
     st.markdown(
         f"Store **{avg_store.idxmax()}** memimpin dengan rata-rata sekitar "
-        f"**USD ${avg_store.max():,.0f}** per minggu, sementara **Store {avg_store.idxmin()}** "
+        f" **USD ${avg_store.max():,.0f}** per minggu, sementara **Store {avg_store.idxmin()}** "
         f"berada di ujung bawah dengan rata-rata **USD ${avg_store.min():,.0f}** per minggu. "
         "Rentang ini menunjukkan bahwa setiap toko memiliki karakteristik penjualan yang berbeda, "
         "bukan hanya dipengaruhi oleh lokasi, tetapi juga oleh musim dan kondisi ekonomi lokal."
