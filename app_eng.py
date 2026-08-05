@@ -234,6 +234,10 @@ def configure_page():
 @st.cache_data
 def load_data() -> pd.DataFrame:
     df = pd.read_csv(DATA_URL)
+    df["Date"] = pd.to_datetime(df["Date"], format="%d-%m-%Y")
+    df["Year"] = df["Date"].dt.year
+    df["Month"] = df["Date"].dt.month
+    df["Week"] = df["Date"].dt.isocalendar().week.astype(int)
     return df
 
 
@@ -318,7 +322,9 @@ def style_table(df: pd.DataFrame) -> pd.io.formats.style.Styler:
 # PAGE: DATASET
 # -------------------------------------------------------------------
 
-def page_dataset(df: pd.DataFrame):
+def page_dataset(df: pd.DataFrame, results: dict):
+    df_model = results["df_model"]
+    
     page_header(
         "01 · DATASET",
         "Raw Data Overview",
@@ -351,7 +357,7 @@ def page_dataset(df: pd.DataFrame):
 
     st.divider()
     st.subheader("Numerical Summary")
-    st.dataframe(style_table(df.describe()), use_container_width=True)
+    st.dataframe(style_table(df_model.describe()), use_container_width=True)
 
 
 # -------------------------------------------------------------------
@@ -424,8 +430,9 @@ def page_statistik(df: pd.DataFrame):
 # -------------------------------------------------------------------
 
 def page_ml(df: pd.DataFrame, results: dict):
-    results_df = results["results"]
+    hasil_split = results["hasil_split"]
     feature_importance = results["feature_importance"]
+    corr = results["corr"]
 
     page_header(
         "03 · MACHINE LEARNING",
@@ -434,7 +441,7 @@ def page_ml(df: pd.DataFrame, results: dict):
     )
 
     st.subheader("Model Performance by Train-Test Split")
-    st.dataframe(style_table(results_df), hide_index=True, use_container_width=True)
+    st.dataframe(style_table(hasil_split), hide_index=True, use_container_width=True)
 
     st.divider()
     st.subheader("Feature Importance")
@@ -451,6 +458,15 @@ def page_ml(df: pd.DataFrame, results: dict):
         font=dict(family=BODY_FONT),
     )
     st.plotly_chart(fig_feat, use_container_width=True)
+
+    st.divider()
+    st.subheader("Correlation Matrix")
+    fig_corr = px.imshow(corr, text_auto=".2f", color_continuous_scale="RdBu", zmin=-1, zmax=1)
+    fig_corr.update_layout(
+        title="Feature Correlations",
+        font=dict(family=BODY_FONT),
+    )
+    st.plotly_chart(fig_corr, use_container_width=True)
 
     st.divider()
     with st.expander("About Feature Importance"):
@@ -503,13 +519,22 @@ def page_prediksi(df: pd.DataFrame, results: dict):
     st.divider()
 
     if st.button("Calculate Prediction", type="primary"):
+        # Ensure column order matches training data
         data_baru = pd.DataFrame(
             {
-                "Store": [store], "Holiday_Flag": [holiday], "Temperature": [temperature],
-                "Fuel_Price": [fuel], "CPI": [cpi], "Unemployment": [unemployment],
-                "Year": [year], "Month": [month], "Week": [week],
+                "Store": [store], 
+                "Holiday_Flag": [holiday], 
+                "Temperature": [temperature],
+                "Fuel_Price": [fuel], 
+                "CPI": [cpi], 
+                "Unemployment": [unemployment],
+                "Year": [year], 
+                "Month": [month], 
+                "Week": [week],
             }
         )
+        # Reorder to match model training features
+        data_baru = data_baru[results["X"].columns]
         hasil = model.predict(data_baru)[0]
 
         q1, q3 = df["Weekly_Sales"].quantile([0.25, 0.75])
@@ -549,6 +574,7 @@ def page_kesimpulan(df: pd.DataFrame, results: dict):
     best_split = results["best_split"]
     feature_importance = results["feature_importance"]
     top_feat = feature_importance.iloc[0]
+    df_model = results["df_model"]
 
     page_header(
         "05 · SUMMARY",
@@ -557,13 +583,13 @@ def page_kesimpulan(df: pd.DataFrame, results: dict):
     )
 
     c1, c2, c3 = st.columns(3)
-    c1.metric("Total Records", f"{len(df):,}")
-    c2.metric("Number of Stores", df["Store"].nunique())
+    c1.metric("Total Records", f"{len(df_model):,}")
+    c2.metric("Number of Stores", df_model["Store"].nunique())
     c3.metric("Period", f"{int(df['Year'].min())}–{int(df['Year'].max())}")
 
     st.markdown(
-        f"This dashboard is built on **{len(df):,} rows** of weekly sales data from "
-        f"**{df['Store'].nunique()} Walmart stores**. After exploratory data analysis and descriptive statistics "
+        f"This dashboard is built on **{len(df_model):,} rows** of weekly sales data from "
+        f"**{df_model['Store'].nunique()} Walmart stores**. After exploratory data analysis and descriptive statistics "
         "revealed significant variation across stores and months, a Machine Learning "
         "approach—specifically **Random Forest Regression**—was chosen because it handles "
         "non-linear relationships without extensive preprocessing."
@@ -655,7 +681,7 @@ def main():
     results = train_models(df)
 
     if menu == "Dataset":
-        page_dataset(df)
+        page_dataset(df, results)
     elif menu == "Statistics":
         page_statistik(df)
     elif menu == "Machine Learning":
