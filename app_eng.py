@@ -473,8 +473,8 @@ def page_ml(df: pd.DataFrame, results: dict):
         st.markdown(
             "Random Forest calculates importance by measuring how much each feature decreases "
             "impurity (typically Gini impurity) when splitting nodes in decision trees. Features that "
-            "separate samples more effectively capturing seasonal patterns or variable interactions "
-            "that aren't linear rank higher. This differs from simple correlation analysis, so rankings may vary."
+            "separate samples more effectively—capturing seasonal patterns or variable interactions "
+            "that aren't linear—rank higher. This differs from simple correlation analysis, so rankings may vary."
         )
 
 
@@ -591,7 +591,7 @@ def page_kesimpulan(df: pd.DataFrame, results: dict):
         f"This dashboard is built on **{len(df_model):,} rows** of weekly sales data from "
         f"**{df_model['Store'].nunique()} Walmart stores**. After exploratory data analysis and descriptive statistics "
         "revealed significant variation across stores and months, a Machine Learning "
-        "approach specifically **Random Forest Regression** was chosen because it handles "
+        "approach—specifically **Random Forest Regression**—was chosen because it handles "
         "non-linear relationships without extensive preprocessing."
     )
 
@@ -621,10 +621,354 @@ def page_kesimpulan(df: pd.DataFrame, results: dict):
     )
 
     st.success(
-        "Overall, this dashboard provides a complete view from raw data through statistics to a production model sufficient for both initial exploration and weekly sales scenario simulations."
+        "Overall, this dashboard provides a complete view from raw data through statistics to a production model—sufficient for both initial exploration and weekly sales scenario simulations."
     )
 
     st.balloons()
+
+
+# -------------------------------------------------------------------
+# PAGE: REPORTS (PDF & PPT Export)
+# -------------------------------------------------------------------
+
+def generate_pdf_report(df: pd.DataFrame, results: dict):
+    """Generate PDF report from sales forecasting data"""
+    from reportlab.lib.pagesizes import letter, A4
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, Image
+    from io import BytesIO
+    from datetime import datetime
+    
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+    story = []
+    styles = getSampleStyleSheet()
+    
+    # Custom styles
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor('#132A3A'),
+        spaceAfter=12,
+        alignment=1  # Center
+    )
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.HexColor('#2F6F52'),
+        spaceAfter=8,
+        spaceBefore=8
+    )
+    
+    # Title
+    story.append(Paragraph("🧾 Walmart Sales Forecasting Report", title_style))
+    story.append(Paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}", styles['Normal']))
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Executive Summary
+    story.append(Paragraph("Executive Summary", heading_style))
+    df_model = results["df_model"]
+    summary_text = f"""
+    This report presents a comprehensive analysis of Walmart weekly sales data covering {int(df['Year'].min())}–{int(df['Year'].max())} 
+    across {df_model['Store'].nunique()} store locations. The analysis includes descriptive statistics, correlation analysis, 
+    and a machine learning model for sales forecasting.
+    <br/><br/>
+    <b>Dataset Overview:</b><br/>
+    • Total Records: {len(df_model):,}<br/>
+    • Number of Stores: {df_model['Store'].nunique()}<br/>
+    • Date Range: {int(df['Year'].min())}–{int(df['Year'].max())}<br/>
+    """
+    story.append(Paragraph(summary_text, styles['Normal']))
+    story.append(Spacer(1, 0.2*inch))
+    
+    # Model Performance
+    story.append(Paragraph("Model Performance", heading_style))
+    mae, rmse, r2 = results["mae"], results["rmse"], results["r2"]
+    best_split = results["best_split"]
+    
+    perf_data = [
+        ["Metric", "Value"],
+        ["Mean Absolute Error (MAE)", f"${mae:,.2f}"],
+        ["Root Mean Squared Error (RMSE)", f"${rmse:,.2f}"],
+        ["R² Score", f"{r2:.4f}"],
+        ["Best Train-Test Split", best_split["Split"]],
+    ]
+    
+    perf_table = Table(perf_data, colWidths=[3*inch, 2.5*inch])
+    perf_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2F6F52')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#EEF1ED')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#DCE3DD')),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#EEF1ED')]),
+    ]))
+    story.append(perf_table)
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Top Features
+    story.append(Paragraph("Top 5 Most Important Features", heading_style))
+    feature_importance = results["feature_importance"]
+    
+    feat_data = [["Rank", "Feature", "Importance Score"]]
+    for idx, row in feature_importance.head(5).iterrows():
+        feat_data.append([str(idx+1), row["Feature"], f"{row['Importance']:.4f}"])
+    
+    feat_table = Table(feat_data, colWidths=[0.8*inch, 2.5*inch, 1.7*inch])
+    feat_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#B98A2E')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 11),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#EEF1ED')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#DCE3DD')),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#EEF1ED')]),
+    ]))
+    story.append(feat_table)
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Conclusion
+    story.append(PageBreak())
+    story.append(Paragraph("Conclusion", heading_style))
+    conclusion_text = f"""
+    The Random Forest Regression model achieves an R² score of {r2:.4f}, indicating a strong fit to the data. 
+    The model captures non-linear relationships between features and weekly sales, with {feature_importance.iloc[0]['Feature']} 
+    emerging as the most influential variable. The model can be deployed for weekly sales forecasting and scenario analysis.<br/><br/>
+    <b>Recommendations:</b><br/>
+    • Use this model for short-term (weekly) sales forecasting<br/>
+    • Monitor prediction accuracy as new data becomes available<br/>
+    • Consider retraining quarterly to capture seasonal and trend changes<br/>
+    • Use feature importance rankings to prioritize data collection efforts<br/>
+    """
+    story.append(Paragraph(conclusion_text, styles['Normal']))
+    
+    # Build PDF
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
+
+
+def generate_ppt_report(df: pd.DataFrame, results: dict):
+    """Generate PowerPoint presentation from sales forecasting analysis"""
+    try:
+        from pptx import Presentation
+        from pptx.util import Inches, Pt
+        from pptx.enum.text import PP_ALIGN
+        from pptx.dml.color import RGBColor
+        from io import BytesIO
+        from datetime import datetime
+    except ImportError:
+        st.error("PowerPoint support not available. Please use PDF export instead.")
+        return None
+    
+    buffer = BytesIO()
+    prs = Presentation()
+    prs.slide_width = Inches(10)
+    prs.slide_height = Inches(7.5)
+    
+    # Color scheme
+    DARK_COLOR = RGBColor(19, 42, 58)      # INK
+    ACCENT_COLOR = RGBColor(47, 111, 82)   # ACCENT
+    GOLD_COLOR = RGBColor(185, 138, 46)    # GOLD
+    
+    def add_title_slide(title, subtitle):
+        slide = prs.slides.add_slide(prs.slide_layouts[6])  # Blank layout
+        background = slide.background
+        fill = background.fill
+        fill.solid()
+        fill.fore_color.rgb = ACCENT_COLOR
+        
+        title_box = slide.shapes.add_textbox(Inches(0.5), Inches(2.5), Inches(9), Inches(1.5))
+        title_frame = title_box.text_frame
+        title_frame.text = title
+        title_frame.paragraphs[0].font.size = Pt(54)
+        title_frame.paragraphs[0].font.bold = True
+        title_frame.paragraphs[0].font.color.rgb = RGBColor(255, 255, 255)
+        
+        subtitle_box = slide.shapes.add_textbox(Inches(0.5), Inches(4.2), Inches(9), Inches(2))
+        subtitle_frame = subtitle_box.text_frame
+        subtitle_frame.word_wrap = True
+        subtitle_frame.text = subtitle
+        subtitle_frame.paragraphs[0].font.size = Pt(20)
+        subtitle_frame.paragraphs[0].font.color.rgb = RGBColor(255, 255, 255)
+    
+    def add_content_slide(title, content_list):
+        slide = prs.slides.add_slide(prs.slide_layouts[6])  # Blank
+        
+        # Title
+        title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.5), Inches(9), Inches(0.8))
+        title_frame = title_box.text_frame
+        title_frame.text = title
+        title_frame.paragraphs[0].font.size = Pt(40)
+        title_frame.paragraphs[0].font.bold = True
+        title_frame.paragraphs[0].font.color.rgb = ACCENT_COLOR
+        
+        # Content
+        content_box = slide.shapes.add_textbox(Inches(0.7), Inches(1.8), Inches(8.6), Inches(5))
+        text_frame = content_box.text_frame
+        text_frame.word_wrap = True
+        
+        for i, item in enumerate(content_list):
+            if i > 0:
+                text_frame.add_paragraph()
+            p = text_frame.paragraphs[i]
+            p.text = item
+            p.font.size = Pt(18)
+            p.font.color.rgb = DARK_COLOR
+            p.space_before = Pt(6)
+            p.space_after = Pt(6)
+            p.level = 0
+    
+    # Slide 1: Title
+    add_title_slide(
+        "📊 Walmart Sales Forecasting",
+        f"Analysis Report • {datetime.now().strftime('%B %Y')}"
+    )
+    
+    # Slide 2: Overview
+    df_model = results["df_model"]
+    add_content_slide("Dataset Overview", [
+        f"✓ Total Records: {len(df_model):,} weekly observations",
+        f"✓ Store Locations: {df_model['Store'].nunique()} Walmart stores",
+        f"✓ Time Period: {int(df['Year'].min())}–{int(df['Year'].max())}",
+        f"✓ Features: {len(results['X'].columns)} input variables",
+        f"✓ Target: Weekly Sales (USD)",
+    ])
+    
+    # Slide 3: Model Performance
+    mae, rmse, r2 = results["mae"], results["rmse"], results["r2"]
+    best_split = results["best_split"]
+    add_content_slide("Model Performance Metrics", [
+        f"✓ Model: Random Forest Regressor (100 trees)",
+        f"✓ Mean Absolute Error (MAE): ${mae:,.0f}",
+        f"✓ Root Mean Squared Error (RMSE): ${rmse:,.0f}",
+        f"✓ R² Score: {r2:.4f} (Strong correlation)",
+        f"✓ Best Split: {best_split['Split']} train-test ratio",
+    ])
+    
+    # Slide 4: Top Features
+    feature_importance = results["feature_importance"]
+    top_5 = feature_importance.head(5)
+    feature_text = [f"✓ {row['Feature']}: {row['Importance']:.4f}" 
+                    for _, row in top_5.iterrows()]
+    add_content_slide("Top 5 Most Important Features", feature_text)
+    
+    # Slide 5: Key Insights
+    add_content_slide("Key Insights", [
+        f"✓ {feature_importance.iloc[0]['Feature']} is the strongest predictor",
+        f"✓ Model explains {r2*100:.1f}% of sales variance",
+        f"✓ Average prediction error: ${mae:,.0f} per week",
+        f"✓ Non-linear patterns captured by tree-based model",
+        f"✓ Ready for production deployment and retraining",
+    ])
+    
+    # Slide 6: Recommendations
+    add_content_slide("Recommendations", [
+        "✓ Deploy model for weekly sales forecasting",
+        "✓ Monitor accuracy as new data accumulates",
+        "✓ Retrain quarterly to capture seasonal changes",
+        "✓ Use feature importance for strategic decisions",
+        "✓ Integrate predictions into inventory planning",
+    ])
+    
+    # Slide 7: Conclusion
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    background = slide.background
+    fill = background.fill
+    fill.solid()
+    fill.fore_color.rgb = DARK_COLOR
+    
+    conclusion_box = slide.shapes.add_textbox(Inches(1), Inches(2), Inches(8), Inches(3.5))
+    conclusion_frame = conclusion_box.text_frame
+    conclusion_frame.word_wrap = True
+    conclusion_frame.text = "Thank You"
+    conclusion_frame.paragraphs[0].font.size = Pt(54)
+    conclusion_frame.paragraphs[0].font.bold = True
+    conclusion_frame.paragraphs[0].font.color.rgb = GOLD_COLOR
+    conclusion_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+    
+    conclusion_frame.add_paragraph()
+    p = conclusion_frame.paragraphs[1]
+    p.text = "Walmart Sales Forecasting Dashboard"
+    p.font.size = Pt(24)
+    p.font.color.rgb = RGBColor(255, 255, 255)
+    p.alignment = PP_ALIGN.CENTER
+    
+    prs.save(buffer)
+    buffer.seek(0)
+    return buffer
+
+
+def page_reports(df: pd.DataFrame, results: dict):
+    page_header(
+        "06 · REPORTS",
+        "Export & Download",
+        "Generate and download comprehensive analysis reports in PDF or PowerPoint format.",
+    )
+    
+    st.subheader("Download Report")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("📄 Download as PDF", use_container_width=True, type="primary"):
+            with st.spinner("Generating PDF report..."):
+                pdf_buffer = generate_pdf_report(df, results)
+                st.download_button(
+                    label="📥 Click to download PDF",
+                    data=pdf_buffer,
+                    file_name=f"Walmart_Sales_Report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                )
+                st.success("✅ PDF generated successfully!")
+    
+    with col2:
+        if st.button("🎬 Download as PowerPoint", use_container_width=True):
+            with st.spinner("Generating PowerPoint presentation..."):
+                try:
+                    ppt_buffer = generate_ppt_report(df, results)
+                    if ppt_buffer:
+                        st.download_button(
+                            label="📥 Click to download PPT",
+                            data=ppt_buffer,
+                            file_name=f"Walmart_Sales_Report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.pptx",
+                            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                            use_container_width=True,
+                        )
+                        st.success("✅ PowerPoint generated successfully!")
+                except Exception as e:
+                    st.error(f"Error generating PowerPoint: {str(e)}")
+    
+    st.divider()
+    st.subheader("Report Contents")
+    st.markdown("""
+    **PDF Report includes:**
+    - Executive summary of the analysis
+    - Model performance metrics (MAE, RMSE, R²)
+    - Top 5 most important features
+    - Detailed conclusions and recommendations
+    - Professional formatting for sharing
+    
+    **PowerPoint Presentation includes:**
+    - Title slide with report metadata
+    - Dataset overview and statistics
+    - Model performance metrics
+    - Feature importance rankings
+    - Key insights and findings
+    - Strategic recommendations
+    - Thank you slide
+    """)
 
 
 # -------------------------------------------------------------------
@@ -637,6 +981,7 @@ NAV_ITEMS = [
     ("Machine Learning", "🧠"),
     ("Prediction", "🎯"),
     ("Conclusion", "📄"),
+    ("Reports", "📥"),
 ]
 
 
@@ -690,6 +1035,8 @@ def main():
         page_prediksi(df, results)
     elif menu == "Conclusion":
         page_kesimpulan(df, results)
+    elif menu == "Reports":
+        page_reports(df, results)
 
 
 if __name__ == "__main__":
