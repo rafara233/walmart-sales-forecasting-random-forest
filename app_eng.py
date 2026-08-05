@@ -473,8 +473,8 @@ def page_ml(df: pd.DataFrame, results: dict):
         st.markdown(
             "Random Forest calculates importance by measuring how much each feature decreases "
             "impurity (typically Gini impurity) when splitting nodes in decision trees. Features that "
-            "separate samples more effectively—capturing seasonal patterns or variable interactions "
-            "that aren't linear—rank higher. This differs from simple correlation analysis, so rankings may vary."
+            "separate samples more effectively capturing seasonal patterns or variable interactions "
+            "that aren't linear rank higher. This differs from simple correlation analysis, so rankings may vary."
         )
 
 
@@ -591,7 +591,7 @@ def page_kesimpulan(df: pd.DataFrame, results: dict):
         f"This dashboard is built on **{len(df_model):,} rows** of weekly sales data from "
         f"**{df_model['Store'].nunique()} Walmart stores**. After exploratory data analysis and descriptive statistics "
         "revealed significant variation across stores and months, a Machine Learning "
-        "approach—specifically **Random Forest Regression**—was chosen because it handles "
+        "approach specifically **Random Forest Regression** was chosen because it handles "
         "non-linear relationships without extensive preprocessing."
     )
 
@@ -621,7 +621,7 @@ def page_kesimpulan(df: pd.DataFrame, results: dict):
     )
 
     st.success(
-        "Overall, this dashboard provides a complete view from raw data through statistics to a production model—sufficient for both initial exploration and weekly sales scenario simulations."
+        "Overall, this dashboard provides a complete view from raw data through statistics to a production model sufficient for both initial exploration and weekly sales scenario simulations."
     )
 
     st.balloons()
