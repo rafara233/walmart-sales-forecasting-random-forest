@@ -756,6 +756,31 @@ Limitations & Next Steps:
     return buffer
 
 
+def download_pdf_from_github():
+    """Download PDF report directly from GitHub repository"""
+    import requests
+    from datetime import datetime
+    
+    # GitHub raw content URL
+    github_url = (
+        "https://raw.githubusercontent.com/rafara233/"
+        "walmart-sales-forecasting-random-forest/main/Walmart_Sales_Report.pdf"
+    )
+    
+    try:
+        response = requests.get(github_url, timeout=10)
+        if response.status_code == 200:
+            from io import BytesIO
+            buffer = BytesIO(response.content)
+            buffer.seek(0)
+            return buffer
+        else:
+            return None
+    except Exception as e:
+        st.error(f"Error downloading PDF: {str(e)}")
+        return None
+
+
 def generate_ppt_report(df: pd.DataFrame, results: dict):
     """Generate PowerPoint presentation from sales forecasting analysis"""
     try:
@@ -910,14 +935,14 @@ def page_reports(df: pd.DataFrame, results: dict):
     page_header(
         "06 · REPORTS",
         "Export & Download",
-        "Generate and download comprehensive analysis reports in TXT or PowerPoint format.",
+        "Generate and download comprehensive analysis reports in multiple formats.",
     )
     
     st.subheader("Download Report")
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("📄 Download as Text Report", use_container_width=True, type="primary"):
+        if st.button("📄 Download as Text Report", use_container_width=True):
             with st.spinner("Generating text report..."):
                 txt_buffer = generate_pdf_report(df, results)
                 st.download_button(
@@ -930,6 +955,25 @@ def page_reports(df: pd.DataFrame, results: dict):
                 st.success("✅ Text report generated successfully!")
     
     with col2:
+        if st.button("📘 Download PDF from GitHub", use_container_width=True, type="primary"):
+            with st.spinner("Downloading PDF from GitHub..."):
+                try:
+                    pdf_buffer = download_pdf_from_github()
+                    if pdf_buffer is not None:
+                        st.download_button(
+                            label="📥 Click to download PDF",
+                            data=pdf_buffer,
+                            file_name=f"Walmart_Sales_Report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+                            mime="application/pdf",
+                            use_container_width=True,
+                        )
+                        st.success("✅ PDF downloaded successfully!")
+                    else:
+                        st.warning("⚠️ Could not download PDF from GitHub. Please check the repository.")
+                except Exception as e:
+                    st.warning(f"⚠️ Error downloading PDF: {str(e)}")
+    
+    with col3:
         if st.button("🎬 Download as PowerPoint", use_container_width=True):
             with st.spinner("Generating PowerPoint presentation..."):
                 try:
@@ -944,9 +988,9 @@ def page_reports(df: pd.DataFrame, results: dict):
                         )
                         st.success("✅ PowerPoint generated successfully!")
                     else:
-                        st.warning("⚠️ PowerPoint library not available. Please use Text Report instead.")
+                        st.warning("⚠️ PowerPoint library not available. Please use other formats instead.")
                 except Exception as e:
-                    st.warning(f"⚠️ PowerPoint generation not available. Error: {str(e)}\nPlease download Text Report instead.")
+                    st.warning(f"⚠️ PowerPoint generation not available. Error: {str(e)}\nPlease try other download options.")
     
     st.divider()
     st.subheader("Report Contents")
@@ -960,6 +1004,12 @@ def page_reports(df: pd.DataFrame, results: dict):
     - Conclusions and strategic recommendations
     - Limitations and next steps
     
+    **PDF Report (from GitHub):**
+    - Professional formatted PDF document
+    - Visual charts and graphs
+    - Detailed analysis and insights
+    - Ready for presentation to stakeholders
+    
     **PowerPoint Presentation includes:**
     - Title slide with report metadata
     - Dataset overview and statistics
@@ -969,7 +1019,8 @@ def page_reports(df: pd.DataFrame, results: dict):
     - Strategic recommendations
     - Thank you slide
     
-    💡 **Note**: The Text Report is always available. PowerPoint requires the `python-pptx` library.
+    💡 **Note**: Text Report is generated locally. PDF is downloaded from the project GitHub repository.
+    PowerPoint requires the `python-pptx` library.
     """)
 
 
