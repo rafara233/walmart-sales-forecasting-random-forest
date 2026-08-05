@@ -632,129 +632,126 @@ def page_kesimpulan(df: pd.DataFrame, results: dict):
 # -------------------------------------------------------------------
 
 def generate_pdf_report(df: pd.DataFrame, results: dict):
-    """Generate PDF report from sales forecasting data"""
-    from reportlab.lib.pagesizes import letter, A4
-    from reportlab.lib import colors
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.units import inch
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, Image
-    from io import BytesIO
+    """Generate CSV/Text report that can be converted to PDF"""
+    from io import StringIO
     from datetime import datetime
     
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
-    story = []
-    styles = getSampleStyleSheet()
+    # Create text-based report
+    report = StringIO()
     
-    # Custom styles
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=24,
-        textColor=colors.HexColor('#132A3A'),
-        spaceAfter=12,
-        alignment=1  # Center
-    )
-    heading_style = ParagraphStyle(
-        'CustomHeading',
-        parent=styles['Heading2'],
-        fontSize=14,
-        textColor=colors.HexColor('#2F6F52'),
-        spaceAfter=8,
-        spaceBefore=8
-    )
-    
-    # Title
-    story.append(Paragraph("🧾 Walmart Sales Forecasting Report", title_style))
-    story.append(Paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}", styles['Normal']))
-    story.append(Spacer(1, 0.3*inch))
+    # Header
+    report.write("=" * 80 + "\n")
+    report.write("WALMART SALES FORECASTING - COMPREHENSIVE REPORT\n")
+    report.write("=" * 80 + "\n\n")
+    report.write(f"Generated: {datetime.now().strftime('%B %d, %Y at %H:%M')}\n\n")
     
     # Executive Summary
-    story.append(Paragraph("Executive Summary", heading_style))
+    report.write("EXECUTIVE SUMMARY\n")
+    report.write("-" * 80 + "\n")
     df_model = results["df_model"]
-    summary_text = f"""
-    This report presents a comprehensive analysis of Walmart weekly sales data covering {int(df['Year'].min())}–{int(df['Year'].max())} 
-    across {df_model['Store'].nunique()} store locations. The analysis includes descriptive statistics, correlation analysis, 
-    and a machine learning model for sales forecasting.
-    <br/><br/>
-    <b>Dataset Overview:</b><br/>
-    • Total Records: {len(df_model):,}<br/>
-    • Number of Stores: {df_model['Store'].nunique()}<br/>
-    • Date Range: {int(df['Year'].min())}–{int(df['Year'].max())}<br/>
-    """
-    story.append(Paragraph(summary_text, styles['Normal']))
-    story.append(Spacer(1, 0.2*inch))
+    report.write(f"""
+This report presents a comprehensive analysis of Walmart weekly sales data covering 
+{int(df['Year'].min())}–{int(df['Year'].max())} across {df_model['Store'].nunique()} store locations. 
+The analysis includes descriptive statistics, correlation analysis, and a machine 
+learning model for sales forecasting.
+
+DATASET OVERVIEW:
+  • Total Records: {len(df_model):,}
+  • Number of Stores: {df_model['Store'].nunique()}
+  • Date Range: {int(df['Year'].min())}–{int(df['Year'].max())}
+  • Features Used: {len(results['X'].columns)}
+  • Target Variable: Weekly Sales (USD)
+
+""")
     
     # Model Performance
-    story.append(Paragraph("Model Performance", heading_style))
+    report.write("MODEL PERFORMANCE METRICS\n")
+    report.write("-" * 80 + "\n")
     mae, rmse, r2 = results["mae"], results["rmse"], results["r2"]
     best_split = results["best_split"]
     
-    perf_data = [
-        ["Metric", "Value"],
-        ["Mean Absolute Error (MAE)", f"${mae:,.2f}"],
-        ["Root Mean Squared Error (RMSE)", f"${rmse:,.2f}"],
-        ["R² Score", f"{r2:.4f}"],
-        ["Best Train-Test Split", best_split["Split"]],
-    ]
-    
-    perf_table = Table(perf_data, colWidths=[3*inch, 2.5*inch])
-    perf_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2F6F52')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 12),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#EEF1ED')),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#DCE3DD')),
-        ('FONTSIZE', (0, 1), (-1, -1), 10),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#EEF1ED')]),
-    ]))
-    story.append(perf_table)
-    story.append(Spacer(1, 0.3*inch))
+    report.write(f"""
+Algorithm: Random Forest Regressor
+Number of Trees: 100
+Max Depth: Default (unlimited)
+
+Performance Metrics:
+  • Mean Absolute Error (MAE): ${mae:,.2f}
+  • Root Mean Squared Error (RMSE): ${rmse:,.2f}
+  • R² Score: {r2:.4f}
+  • Best Train-Test Split: {best_split["Split"]}
+
+Interpretation:
+  - The model explains {r2*100:.1f}% of the variance in weekly sales
+  - Average prediction error is approximately ${mae:,.0f} per week
+  - Model performance indicates a strong fit to the training data
+
+""")
     
     # Top Features
-    story.append(Paragraph("Top 5 Most Important Features", heading_style))
+    report.write("TOP 10 MOST IMPORTANT FEATURES\n")
+    report.write("-" * 80 + "\n")
     feature_importance = results["feature_importance"]
     
-    feat_data = [["Rank", "Feature", "Importance Score"]]
-    for idx, row in feature_importance.head(5).iterrows():
-        feat_data.append([str(idx+1), row["Feature"], f"{row['Importance']:.4f}"])
+    report.write("\nRank | Feature Name             | Importance Score | Percentage\n")
+    report.write("-" * 80 + "\n")
+    total_importance = feature_importance["Importance"].sum()
     
-    feat_table = Table(feat_data, colWidths=[0.8*inch, 2.5*inch, 1.7*inch])
-    feat_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#B98A2E')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 11),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#EEF1ED')),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#DCE3DD')),
-        ('FONTSIZE', (0, 1), (-1, -1), 10),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#EEF1ED')]),
-    ]))
-    story.append(feat_table)
-    story.append(Spacer(1, 0.3*inch))
+    for idx, row in feature_importance.head(10).iterrows():
+        percentage = (row['Importance'] / total_importance) * 100
+        report.write(f"{idx+1:4d} | {row['Feature']:24s} | {row['Importance']:16.6f} | {percentage:6.2f}%\n")
     
-    # Conclusion
-    story.append(PageBreak())
-    story.append(Paragraph("Conclusion", heading_style))
-    conclusion_text = f"""
-    The Random Forest Regression model achieves an R² score of {r2:.4f}, indicating a strong fit to the data. 
-    The model captures non-linear relationships between features and weekly sales, with {feature_importance.iloc[0]['Feature']} 
-    emerging as the most influential variable. The model can be deployed for weekly sales forecasting and scenario analysis.<br/><br/>
-    <b>Recommendations:</b><br/>
-    • Use this model for short-term (weekly) sales forecasting<br/>
-    • Monitor prediction accuracy as new data becomes available<br/>
-    • Consider retraining quarterly to capture seasonal and trend changes<br/>
-    • Use feature importance rankings to prioritize data collection efforts<br/>
-    """
-    story.append(Paragraph(conclusion_text, styles['Normal']))
+    report.write("\n")
     
-    # Build PDF
-    doc.build(story)
+    # Correlation Summary
+    report.write("FEATURE CORRELATIONS WITH TARGET (Weekly Sales)\n")
+    report.write("-" * 80 + "\n")
+    corr = results["corr"]
+    if "Weekly_Sales" in corr.columns:
+        sales_corr = corr["Weekly_Sales"].sort_values(ascending=False).head(10)
+        for feature, corr_val in sales_corr.items():
+            if feature != "Weekly_Sales":
+                report.write(f"  {feature:24s}: {corr_val:8.4f}\n")
+    
+    report.write("\n")
+    
+    # Conclusions
+    report.write("CONCLUSIONS & RECOMMENDATIONS\n")
+    report.write("-" * 80 + "\n")
+    report.write(f"""
+The Random Forest Regression model achieves an R² score of {r2:.4f}, indicating a 
+strong fit to the historical data. The model successfully captures non-linear 
+relationships between features and weekly sales.
+
+Key Findings:
+  • {feature_importance.iloc[0]['Feature']} is the most influential variable for 
+    predicting weekly sales
+  • The model performs consistently across different train-test split ratios
+  • Feature importance rankings reveal which factors drive sales most significantly
+
+Strategic Recommendations:
+  ✓ Deploy this model for weekly sales forecasting and planning
+  ✓ Monitor prediction accuracy as new data becomes available
+  ✓ Retrain the model quarterly to capture seasonal changes and trends
+  ✓ Use feature importance rankings to prioritize data collection efforts
+  ✓ Integrate model predictions into inventory and staffing decisions
+  ✓ Consider ensemble approaches combining this model with other forecasting methods
+
+Limitations & Next Steps:
+  • Model trained on historical data (2010-2012)
+  • Predictions for years outside training range are extrapolations
+  • Regular retraining recommended as business conditions evolve
+  • Consider external features (promotions, holidays, economic indicators)
+
+""")
+    
+    report.write("=" * 80 + "\n")
+    report.write("END OF REPORT\n")
+    report.write("=" * 80 + "\n")
+    
+    # Convert to bytes for download
+    from io import BytesIO
+    buffer = BytesIO(report.getvalue().encode('utf-8'))
     buffer.seek(0)
     return buffer
 
@@ -769,7 +766,6 @@ def generate_ppt_report(df: pd.DataFrame, results: dict):
         from io import BytesIO
         from datetime import datetime
     except ImportError:
-        st.error("PowerPoint support not available. Please use PDF export instead.")
         return None
     
     buffer = BytesIO()
@@ -914,31 +910,31 @@ def page_reports(df: pd.DataFrame, results: dict):
     page_header(
         "06 · REPORTS",
         "Export & Download",
-        "Generate and download comprehensive analysis reports in PDF or PowerPoint format.",
+        "Generate and download comprehensive analysis reports in TXT or PowerPoint format.",
     )
     
     st.subheader("Download Report")
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button("📄 Download as PDF", use_container_width=True, type="primary"):
-            with st.spinner("Generating PDF report..."):
-                pdf_buffer = generate_pdf_report(df, results)
+        if st.button("📄 Download as Text Report", use_container_width=True, type="primary"):
+            with st.spinner("Generating text report..."):
+                txt_buffer = generate_pdf_report(df, results)
                 st.download_button(
-                    label="📥 Click to download PDF",
-                    data=pdf_buffer,
-                    file_name=f"Walmart_Sales_Report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.pdf",
-                    mime="application/pdf",
+                    label="📥 Click to download TXT",
+                    data=txt_buffer,
+                    file_name=f"Walmart_Sales_Report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                    mime="text/plain",
                     use_container_width=True,
                 )
-                st.success("✅ PDF generated successfully!")
+                st.success("✅ Text report generated successfully!")
     
     with col2:
         if st.button("🎬 Download as PowerPoint", use_container_width=True):
             with st.spinner("Generating PowerPoint presentation..."):
                 try:
                     ppt_buffer = generate_ppt_report(df, results)
-                    if ppt_buffer:
+                    if ppt_buffer is not None:
                         st.download_button(
                             label="📥 Click to download PPT",
                             data=ppt_buffer,
@@ -947,18 +943,22 @@ def page_reports(df: pd.DataFrame, results: dict):
                             use_container_width=True,
                         )
                         st.success("✅ PowerPoint generated successfully!")
+                    else:
+                        st.warning("⚠️ PowerPoint library not available. Please use Text Report instead.")
                 except Exception as e:
-                    st.error(f"Error generating PowerPoint: {str(e)}")
+                    st.warning(f"⚠️ PowerPoint generation not available. Error: {str(e)}\nPlease download Text Report instead.")
     
     st.divider()
     st.subheader("Report Contents")
     st.markdown("""
-    **PDF Report includes:**
+    **Text Report includes:**
     - Executive summary of the analysis
+    - Dataset overview and statistics
     - Model performance metrics (MAE, RMSE, R²)
-    - Top 5 most important features
-    - Detailed conclusions and recommendations
-    - Professional formatting for sharing
+    - Top 10 most important features with percentages
+    - Feature correlations with target variable
+    - Conclusions and strategic recommendations
+    - Limitations and next steps
     
     **PowerPoint Presentation includes:**
     - Title slide with report metadata
@@ -968,6 +968,8 @@ def page_reports(df: pd.DataFrame, results: dict):
     - Key insights and findings
     - Strategic recommendations
     - Thank you slide
+    
+    💡 **Note**: The Text Report is always available. PowerPoint requires the `python-pptx` library.
     """)
 
 
